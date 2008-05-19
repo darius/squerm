@@ -4,7 +4,7 @@ def is_bool(x):    return isinstance(x, bool)
 def is_symbol(x):  return isinstance(x, basestring)
 def is_list(x):    return isinstance(x, tuple)
 def is_pair(x):    return isinstance(x, tuple) and 0 < len(x)
-def is_null(x):    return isinstance(x, tuple) and 0 == len(x)
+def is_null(x):    return x == ()
 def mklist(*args): return tuple(args)
 def append(x, y):  return tuple(x) + y
 
