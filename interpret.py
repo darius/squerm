@@ -29,16 +29,15 @@ def Apply():
 prims = dict((name, Primitive(fn)) for name, fn in primitives_dict.items())
 prims.update(dict(apply=Apply()))
 
-universal_scope = OuterScope(prims)
+def make_universal_scope(run_queue):
+    return add_process_functions(OuterScope(prims), run_queue)
 
 
 # Processes
 
-def running(code, scope):
-    q = RunQueue()
-    new_scope = add_process_functions(scope, q)
-    q.enqueue(Process(StartingEvalState(code, new_scope)))
-    q.run()
+def run(run_queue, code, scope):
+    run_queue.enqueue(Process(StartingEvalState(code, scope)))
+    run_queue.run()
 
 def StartingEvalState(code, scope):
     def to_is_runnable(): return True
