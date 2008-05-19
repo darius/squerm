@@ -1,16 +1,5 @@
 # Primitive procedures
 
-def write(x):
-    import sys
-    import lispio
-    sys.stdout.write(lispio.write(x))
-    return True
-
-def newline():
-    import sys
-    sys.stdout.write('\n')
-    return True
-
 def is_bool(x):    return isinstance(x, bool)
 def is_symbol(x):  return isinstance(x, basestring)
 def is_list(x):    return isinstance(x, tuple)
@@ -68,8 +57,6 @@ primitives_dict = {
     'equal?':  lambda x, y: x == y,
     'not':     lambda arg: x is False,
     'member':  member,
-    'write':   write,           # XXX move capabilities out of
-    'newline': newline,         #  the top-level environment
 }
 
 def lmap(f, *xs): 
