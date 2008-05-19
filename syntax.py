@@ -207,3 +207,6 @@ macros = {
     'let':        macro_let,
     'or':         macro_or,
     }
+
+def lmap(f, *xs): 
+    return tuple(map(f, *xs))

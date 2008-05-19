@@ -58,6 +58,3 @@ primitives_dict = {
     'not':     lambda arg: x is False,
     'member':  member,
 }
-
-def lmap(f, *xs): 
-    return tuple(map(f, *xs))
