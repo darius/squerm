@@ -61,9 +61,7 @@ def add_process_functions(enclosing_scope, run_queue):
             def to_call(args, k):
                 assert () == args
                 assert process == run_queue.get_running_process()
-                state = process.wait(k)
-                if state.is_runnable(): state = state.step()
-                return state
+                return process.receive(k)
             def to___repr__():
                 return '#<?>'
             return Clutch(locals())

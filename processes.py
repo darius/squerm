@@ -32,8 +32,11 @@ def Process(initial_state):
         mailbox.put(message)
         if not was_runnable:
             run_queue.enqueue(process)
-    def to_wait(cont):
-        return WaitingState(mailbox, cont)
+    def to_receive(cont):
+        new_state = WaitingState(mailbox, cont)
+        if new_state.is_runnable():
+            return new_state.step()
+        return new_state
     def to___repr__():
         return '#<pid>'
     process = Clutch(locals())
