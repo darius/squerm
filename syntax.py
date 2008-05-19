@@ -10,7 +10,7 @@ def expand_toplevel(definitions):
     def expand(exp):
 	if is_symbol(exp):
 	    return VarRefExpr(exp)
-	if is_null(exp):
+	if is_null(exp) or is_bool(exp):
 	    return ConstantExpr(exp)
         assert is_pair(exp)
 	rator = car(exp)
@@ -27,7 +27,7 @@ def expand_toplevel(definitions):
     def expand_begin(exp):
 	exps = cdr(exp)
 	if len(exps) == 0:
-	    return 'nil'
+	    return False
 	elif len(exps) == 1:
 	    return expand(car(exps))
 	else:
@@ -35,7 +35,7 @@ def expand_toplevel(definitions):
 			     expand(make_begin(cdr(exps))))
 
     def expand_if(exp):
-	else_expr = ('nil' if len(exp) == 3 else exp[3])
+	else_expr = (False if len(exp) == 3 else exp[3])
 	return IfExpr(expand(cadr(exp)),
 		      expand(caddr(exp)),
 		      expand(else_expr))
@@ -102,13 +102,13 @@ def make_begin(exps):
 
 def macro_and(exp):
     if len(exp) == 1:
-	return 't'
+	return True
     elif len(exp) == 2:
 	return cadr(exp)
     else:
 	return mklist('if', cadr(exp), 
 		      cons('and', cddr(exp)),
-                      'nil')
+                      False)
 
 def macro_case(exp):
     subject = cadr(exp)
@@ -137,8 +137,8 @@ def translate_case_clause(var, constants, exps):
 
 def macro_cond(exp):
     if len(exp) == 1:
-	# (cond) ==> nil
-	r = 'nil'
+	# (cond) ==> #f
+	r = False
     elif len(exp) == 2 and car(cadr(exp)) == 'else':
 	# (cond (else x...)) ==> (begin x...)
 	r = make_begin(cdr(cadr(exp)))
@@ -187,7 +187,7 @@ def macro_named_let(exp):
 
 def macro_or(exp):
     if len(exp) == 1:
-	return 'nil'
+	return False
     elif len(exp) == 2:
 	return cadr(exp)
     else:

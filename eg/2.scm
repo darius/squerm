@@ -24,7 +24,7 @@
 
 (define (look-up key a-list)
   (cond ((assoc key a-list) => cadr)
-	(else nil)))
+	(else #f)))
 
 (define (acons key value a-list)
   (cons (list key value) a-list))

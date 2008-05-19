@@ -27,9 +27,7 @@ def Apply():
     return Clutch(locals())
 
 prims = dict((name, Primitive(fn)) for name, fn in primitives_dict.items())
-prims.update(dict(t='t',
-                  nil='nil',
-                  apply=Apply()))
+prims.update(dict(apply=Apply()))
 
 universal_scope = OuterScope(prims)
 
@@ -58,7 +56,7 @@ def add_process_functions(enclosing_scope, run_queue):
             return Clutch(locals())
         def send(message):
             process.accept(message, run_queue)
-            return 't'
+            return True
         send_fn = Primitive(send)
         def Receive():
             def to_call(args, k):
@@ -186,7 +184,7 @@ def IfExpr(test_expr, then_expr, else_expr):
 
 def TestK(then_expr, else_expr, scope, k):
     def to_step(value):
-        return (then_expr if value != 'nil' else else_expr).eval(scope, k)
+        return (else_expr if value is False else then_expr).eval(scope, k)
     def to_show_frame():
         return '(if <#> %r %r)' % (then_expr, else_expr)
     def to_get_parent():

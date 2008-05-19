@@ -4,13 +4,14 @@ def write(x):
     import sys
     import lispio
     sys.stdout.write(lispio.write(x))
-    return 't'
+    return True
 
 def newline():
     import sys
     sys.stdout.write('\n')
-    return 't'
+    return True
 
+def is_bool(x):    return isinstance(x, bool)
 def is_symbol(x):  return isinstance(x, basestring)
 def is_list(x):    return isinstance(x, tuple)
 def is_pair(x):    return isinstance(x, tuple) and 0 < len(x)
@@ -28,24 +29,14 @@ def assoc(key, alist):
         assert is_list(pair)
 	if pair[0] == key:
 	    return pair
-    return 'nil'
+    return False
 
 def member(key, ls):
     assert is_list(ls)
     for i, element in enumerate(ls):
 	if key == element:
 	    return ls[i:]
-    return 'nil'
-
-def for_each(proc, ls):
-    for element in ls:
-	proc(element)
-
-def predicate(f):
-    return lambda x: make_flag(f(x))
-
-def make_flag(x):
-    return 't' if x else 'nil'
+    return False
 
 def car(x): return x[0]
 def cdr(x): return x[1:]
@@ -58,10 +49,10 @@ def cdddr(x): return cdr(cdr(cdr(x)))
 def cadddr(x): return car(cdr(cdr(cdr(x))))
 
 primitives_dict = {
-    'pair?':   predicate(is_pair),
-    'null?':   predicate(is_null),
-    'symbol?': predicate(is_symbol),
-    'list?':   predicate(is_list),
+    'pair?':   is_pair,
+    'null?':   is_null,
+    'symbol?': is_symbol,
+    'list?':   is_list,
     'car':     car,
     'cdr':     cdr,
     'caar':    caar,
@@ -74,8 +65,8 @@ primitives_dict = {
     'list':    mklist,
     'append':  append,
     'assoc':   assoc,
-    'equal?':  lambda x, y: make_flag(x == y),
-    'not':     lambda arg: make_flag(x == 'nil'),
+    'equal?':  lambda x, y: x == y,
+    'not':     lambda arg: x is False,
     'member':  member,
     'write':   write,           # XXX move capabilities out of
     'newline': newline,         #  the top-level environment

@@ -62,12 +62,25 @@ def read_iter(input):
 
     def read_atom():
 	t = token()
+	if t == '#':
+	    return read_hash()
 	chars = []
 	while t != eof and not t.isspace() and t not in '()':
 	    chars.append(t)
 	    advance()
 	    t = token()
         return intern(''.join(chars))
+
+    def read_hash():
+	advance()
+	t = token()
+	if t == 't':
+	    advance()
+	    return True
+	if t == 'f':
+	    advance()
+	    return False
+	raise ValueError("Bad '#' literal syntax: " + t)
 
     while True:
         x = read()
@@ -83,4 +96,6 @@ def write(sexpr):
 	return '(%s)' % ' '.join(map(write, sexpr))
     if isinstance(sexpr, basestring):
         return sexpr
+    if isinstance(sexpr, bool):
+        return '#t' if sexpr else '#f'
     return repr(sexpr)
