@@ -1,4 +1,5 @@
 import clutch
+from primitives import is_bool, is_list, is_symbol
 
 
 # Reading s-expressions
@@ -109,12 +110,11 @@ def read_iter(input):
 # Writing s-expressions
 
 def write(sexpr):
-    if isinstance(sexpr, tuple):
+    if is_list(sexpr):
 	return '(%s)' % ' '.join(map(write, sexpr))
-    if isinstance(sexpr, basestring):
-        # XXX change this to check for symbols; strings should be
-        #  written with quotes
+    if is_symbol(sexpr):
         return sexpr
-    if isinstance(sexpr, bool):
+    if is_bool(sexpr):
         return '#t' if sexpr else '#f'
+    # XXX check for strings here
     return repr(sexpr)
