@@ -1,3 +1,4 @@
+import os
 import sys
 
 import interpret
@@ -32,6 +33,6 @@ def newline():
     return True
 
 def make_os_scope(outer_scope):
-    return scope.Scope(('write', 'newline'),
-                       map(interpret.Primitive, (write, newline)),
+    return scope.Scope(('write', 'newline', 'system'),
+                       map(interpret.Primitive, (write, newline, os.system)),
                        outer_scope)
