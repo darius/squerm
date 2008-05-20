@@ -27,7 +27,8 @@ def Apply():
     return Clutch(locals())
 
 prims = dict((name, Primitive(fn)) for name, fn in primitives_dict.items())
-prims.update(dict(apply=Apply()))
+prims.update(dict(apply=Apply(),
+                  None=None))
 
 def make_universal_scope(run_queue):
     return add_process_functions(OuterScope(prims), run_queue)
