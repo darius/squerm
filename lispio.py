@@ -62,6 +62,8 @@ def read_iter(input):
 
     def read_atom():
 	t = token()
+	if t == '"':
+	    return read_string()
 	if t == '#':
 	    return read_hash()
 	chars = []
@@ -70,6 +72,21 @@ def read_iter(input):
 	    advance()
 	    t = token()
         return intern(''.join(chars))
+
+    def read_string():
+	advance()
+	chars = []
+	t = token()
+	while t != eof and t != '"':
+	    # XXX handle escapes
+	    chars.append(t)
+	    advance()
+	    t = token()
+	advance()
+	result = ''.join(chars)
+	if t == eof:
+	    raise ValueError('Unterminated string constant: "' + result)
+	return result
 
     def read_hash():
 	advance()
@@ -95,6 +112,8 @@ def write(sexpr):
     if isinstance(sexpr, tuple):
 	return '(%s)' % ' '.join(map(write, sexpr))
     if isinstance(sexpr, basestring):
+        # XXX change this to check for symbols; strings should be
+        #  written with quotes
         return sexpr
     if isinstance(sexpr, bool):
         return '#t' if sexpr else '#f'
