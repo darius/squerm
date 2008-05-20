@@ -28,6 +28,7 @@ def Process(initial_state):
 #        print 'trace:', state._.trace()
         state._ = state._.step()
     def to_accept(message, run_queue):
+        # XXX a stopped process should drop messages immediately
         was_runnable = state._.is_runnable()
         mailbox.put(message)
         if not was_runnable:
@@ -56,7 +57,7 @@ def WaitingState(mailbox, cont):
 
 def StoppedState():
     def to_is_runnable(): return False
-    def to_step():        raise ValueError() # XXX
+    def to_step():        raise ValueError() # XXX what's the right exception?
     def to_trace():       return '<stopped>'
     return Clutch(locals())
 
