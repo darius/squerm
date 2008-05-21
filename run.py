@@ -8,8 +8,8 @@ import scope
 import syntax
 
 
-def runfile(name):
-    run(open(name).read())
+def runfile(filename):
+    run(open(filename).read())
 
 def run(s):
     ev(tuple(lispio.read_iter(s)))
@@ -26,11 +26,9 @@ def evaluate(run_queue, definitions, scope):
 
 def write(x):
     sys.stdout.write(lispio.write(x))
-    return True
 
 def newline():
     sys.stdout.write('\n')
-    return True
 
 def make_os_scope(outer_scope):
     return scope.Scope(('write', 'newline', 'system'),

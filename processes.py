@@ -9,7 +9,7 @@ def RunQueue():
             pending_queue.append(process)
     def to_run():
         while pending_queue:
-            running = list(pending_queue)
+            running = pending_queue[:]
             del pending_queue[:]
             for process in running:
                 running_process._ = process
@@ -57,7 +57,7 @@ def WaitingState(mailbox, cont):
 
 def StoppedState():
     def to_is_runnable(): return False
-    def to_step():        raise ValueError() # XXX what's the right exception?
+    def to_step():        assert False
     def to_trace():       return '<stopped>'
     return Clutch(locals())
 
@@ -68,6 +68,5 @@ def Mailbox():
     def to_put(message):
         messages.append(message)
     def to_pop():
-        if not messages: return None
         return messages.pop(0)  # XXX inefficient
     return Clutch(locals())
