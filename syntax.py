@@ -6,6 +6,9 @@ from primitives import *
 # Concrete syntax
 
 def expand_toplevel(definitions):
+    return expand_exp(mklist('local', definitions, ('main',)))
+
+def expand_exp(the_exp):
 
     def expand(exp):
 	if is_symbol(exp):
@@ -72,7 +75,7 @@ def expand_toplevel(definitions):
 	'quote':      expand_quote,
 	}
 
-    return expand_local(mklist('local', definitions, ('main',)))
+    return expand(the_exp)
 
 
 # Macros

@@ -1,7 +1,7 @@
 from clutch import Box, Clutch
 from primitives import *
 from processes import RunningState, RunQueue, Process, StoppedState
-from scope import OuterScope, RecursiveScope, Scope
+from scope import EmptyScope, OuterScope, RecursiveScope, Scope, ScopeClass
 
 
 # Primitive procedures
@@ -26,12 +26,44 @@ def Apply():
         return '#<primitive apply>'
     return Clutch(locals())
 
+def Eval():
+    def to_call(args, k):
+        # XXX move this stuff to a higher module to break the 
+        #  module recursion
+        import syntax
+        sexpr, scope = args
+        assert isinstance(scope, ScopeClass)
+        return syntax.expand_exp(sexpr).eval(scope, k)
+    def to___repr__():
+        return '#<primitive eval>'
+    return Clutch(locals())
+
+def extend_environment(vars, vals, scope):
+    assert is_list(vars)
+    for var in vars:
+        assert is_symbol(var)
+    assert is_list(vals)
+    assert len(vars) == len(vals)
+    return Scope(vars, vals, scope)
+
 prims = dict((name, Primitive(fn)) for name, fn in primitives_dict.items())
-prims.update(dict(apply=Apply(),
-                  None=None))
+prims.update({'apply': Apply(),
+              'eval':  Eval(),
+              'None':  None,
+              'empty-environment': EmptyScope(),
+              'extend-environment': Primitive(extend_environment)})
+
+def RecursiveScopeExpr():
+    def to_make_closure(scope): return scope
+    def to___repr__():          return '<recursive-scope-expr>'
+    return Clutch(locals())
+
+safe_scope = RecursiveScope(zip(('safe-environment',),
+                                (RecursiveScopeExpr(),)),
+                            OuterScope(prims))
 
 def make_universal_scope(run_queue):
-    return add_process_functions(OuterScope(prims), run_queue)
+    return add_process_functions(safe_scope, run_queue)
 
 
 # Processes
@@ -69,18 +101,17 @@ def add_process_functions(enclosing_scope, run_queue):
         process = Process(SpawningState())
         run_queue.enqueue(process)
         return send_fn
-    scope = Scope(('spawn',), (Primitive(spawn),), enclosing_scope)
-    return scope
+    return Scope(('spawn',), (Primitive(spawn),), enclosing_scope)
 
 
 # The interpreter
 
 class Cont(Clutch):
     def __str__(self):
-        return '\n'.join(reversed(self.get_traceback()))
+        return '\n'.join(reversed(self.get_backtrace()))
     def __repr__(self):
-        return '|'.join(self.get_traceback())
-    def get_traceback(self):
+        return '|'.join(self.get_backtrace())
+    def get_backtrace(self):
         return [k.show_frame() for k in ancestry(self)]
         
 def ancestry(k):
@@ -94,7 +125,7 @@ def FinalK():
     def to_step(value):
         return StoppedState()
     def to_show_frame():
-        return '#stop#'
+        return '<stop>'
     def to_get_parent():
         return None
     return Cont(locals())

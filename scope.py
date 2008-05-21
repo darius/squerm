@@ -3,9 +3,14 @@ from clutch import Clutch
 
 # Environments
 
-class EmptyScope:
-    def get(self, var):
-        raise 'Unbound variable', var
+class ScopeClass(Clutch):
+    def __repr__(self):
+        return '#<environment>'
+
+def EmptyScope():
+    def to_get(var):
+        raise 'Unbound variable', var # XXX make an Exception instance
+    return ScopeClass(locals())
 
 def OuterScope(frame):
     return _make_scope(dict(frame), EmptyScope())
@@ -16,11 +21,12 @@ def Scope(vars, vals, enclosing):
 def RecursiveScope(pairs, enclosing):
     frame = dict(pairs)
     scope = _make_scope(frame, enclosing)
-    for var, value in pairs:
-        frame[var] = value.make_closure(scope)
+    for var, expr in pairs:
+        frame[var] = expr.make_closure(scope)
     return scope
 
 def _make_scope(frame, enclosing):
+    assert isinstance(enclosing, ScopeClass)
     def to_get(var):
         return frame[var] if var in frame else enclosing.get(var)
-    return Clutch(locals())
+    return ScopeClass(locals())
