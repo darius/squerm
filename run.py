@@ -6,6 +6,11 @@ import scope
 import syntax
 
 
+def testme():
+    for p in range(4):
+        print '%d:' % p
+        runfile('eg/%d.scm' % p)
+
 def runfile(filename):
     run(open(filename).read())
 
