@@ -1,8 +1,8 @@
 (define (main)
-  (spawn main-process))
+  (spawn #f main-process))
 
 (define (main-process ? !)
-  (let ((sub! (spawn subprocess)))
+  (let ((sub! (spawn #f subprocess)))
     (sub! (list 'hello !))
     (print (list 'main-got-back (?)))))
 

@@ -69,7 +69,8 @@ def make_universal_scope(run_queue):
     return add_process_functions(safe_scope, run_queue)
 
 def add_process_functions(enclosing_scope, run_queue):
-    def spawn(fn):
+    def spawn(opt_keeper, fn):
+        # TODO: check that opt_keeper is a sender or #f
         def SpawningState():
             def to_is_runnable(): return True
             def to_step():        return fn.call((Receive(), send_fn),
@@ -88,7 +89,7 @@ def add_process_functions(enclosing_scope, run_queue):
             def to___repr__():
                 return '#<?>'
             return Clutch(locals())
-        process = Process(SpawningState())
+        process = Process(opt_keeper, SpawningState())
         run_queue.enqueue(process)
         return send_fn
     return Scope(('spawn',), (Primitive(spawn),), enclosing_scope)

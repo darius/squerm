@@ -1,6 +1,6 @@
 (define (main) 
-  (write (spawn (lambda (! ?) 
-		  (whee (list 'a)))))
+  (write (spawn #f (lambda (! ?) 
+		     (whee (list 'a)))))
   (newline)
   (write 'yo)
   (newline))

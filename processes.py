@@ -19,7 +19,7 @@ def RunQueue():
         return running_process._
     return Clutch(locals())
 
-def Process(initial_state):
+def Process(opt_keeper, initial_state):
     state   = Box(initial_state)
     mailbox = Mailbox()
     def to_is_runnable():
