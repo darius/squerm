@@ -10,7 +10,3 @@
   (let ((msg (?)))
     (print (list 'sub-got (car msg)))
     ((cadr msg) 'reply)))
-
-(define (print x)
-  (write x)
-  (newline))

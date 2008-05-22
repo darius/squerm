@@ -2,10 +2,6 @@
   (print (eval '(cons 'a '()) safe-environment))
   (print (eval (test1) safe-environment)))
 
-(define (print x)
-  (write x)
-  (newline))
-
 (define (test1)
   '(local 
     ((define (revappend xs ys)

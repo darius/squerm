@@ -7,10 +7,6 @@
 		(dict! (list 'get 'color !))
 		(print (?))))))
 
-(define (print x)
-  (write x)
-  (newline))
-
 (define (dict-process ? !)
   (let loop ((table '()))
     (let ((m (?)))

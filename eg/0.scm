@@ -1,10 +1,7 @@
 (define (main) 
-  (write (spawn #f (lambda (! ?) 
+  (print (spawn #f (lambda (! ?) 
 		     (whee (list 'a)))))
-  (newline)
-  (write 'yo)
-  (newline))
+  (print 'yo))
 
 (define (whee x)
-  (write (cons x (cons 'b '())))
-  (newline))
+  (print (cons x (cons 'b '()))))

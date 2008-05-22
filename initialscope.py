@@ -100,7 +100,11 @@ def write(x):
 def newline():
     sys.stdout.write('\n')
 
+def print_(x):
+    write(x)
+    newline()
+
 def make_os_scope(outer_scope):
-    return Scope(('write', 'newline', 'system'),
-                 map(Primitive, (write, newline, os.system)),
+    return Scope(('write', 'newline', 'print', 'system'),
+                 map(Primitive, (write, newline, print_, os.system)),
                  outer_scope)
