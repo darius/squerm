@@ -6,7 +6,7 @@
              whee))
     (spawn keeper!
            (lambda (? !)
-             (print 'i-am-ok-though)
+             (print '"I am OK, though")
              (print 'hurray!)))))
 
 (define (keeper ? !)

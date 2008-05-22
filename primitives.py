@@ -1,7 +1,11 @@
+from symbols import Symbol, SymbolClass
+
+
 # Primitive procedures
 
 def is_bool(x):    return isinstance(x, bool)
-def is_symbol(x):  return isinstance(x, basestring)
+def is_string(x):  return isinstance(x, basestring)
+def is_symbol(x):  return isinstance(x, SymbolClass)
 def is_list(x):    return isinstance(x, tuple)
 def is_pair(x):    return isinstance(x, tuple) and 0 < len(x)
 def is_null(x):    return x == ()
@@ -40,6 +44,7 @@ def cadddr(x): return car(cdr(cdr(cdr(x))))
 primitives_dict = {
     'pair?':   is_pair,
     'null?':   is_null,
+    'string?': is_string,
     'symbol?': is_symbol,
     'list?':   is_list,
     'car':     car,

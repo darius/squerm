@@ -7,6 +7,7 @@ import lispio
 from primitives import is_list, is_symbol, primitives_dict
 from processes import RunningState, Process, Sender, SenderClass
 from scope import EmptyScope, OuterScope, RecursiveScope, Scope, ScopeClass
+from symbols import Symbol
 import syntax
 
 
@@ -83,13 +84,14 @@ prims.update({'apply':              Apply(),
               'extend-environment': Primitive(extend_environment),
               'complaining-keeper': ComplainingKeeper(),
               })
+prims = dict((Symbol(name), value) for name, value in prims.items())
 
 def RecursiveScopeExpr():
     def to_make_closure(scope): return scope
     def to___repr__():          return '<recursive-scope-expr>'
     return Clutch(locals())
 
-safe_scope = RecursiveScope(zip(('safe-environment',),
+safe_scope = RecursiveScope(zip((Symbol('safe-environment'),),
                                 (RecursiveScopeExpr(),)),
                             OuterScope(prims))
 
@@ -119,7 +121,7 @@ def add_process_functions(enclosing_scope, run_queue):
         run_queue.enqueue(process)
         sender = Sender(process, run_queue)
         return sender
-    return Scope(('spawn',), (Primitive(spawn),), enclosing_scope)
+    return Scope((Symbol('spawn'),), (Primitive(spawn),), enclosing_scope)
 
 
 def write(x):
@@ -133,6 +135,6 @@ def print_(x):
     newline()
 
 def make_os_scope(outer_scope):
-    return Scope(('write', 'newline', 'print', 'system'),
+    return Scope(map(Symbol, ('write', 'newline', 'print', 'system')),
                  map(Primitive, (write, newline, print_, os.system)),
                  outer_scope)

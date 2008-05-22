@@ -161,5 +161,5 @@ def VarRefExpr(variable):
         import run as foo
 	return RunningState(scope.get(variable), k)
     def to___repr__():
-        return variable
+        return repr(variable)
     return Clutch(locals())

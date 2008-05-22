@@ -1,5 +1,6 @@
 import clutch
-from primitives import is_bool, is_list, is_symbol
+from primitives import is_bool, is_list, is_string, is_symbol
+from symbols import Symbol
 
 
 # Reading s-expressions
@@ -41,7 +42,7 @@ def read_iter(input):
 	t = token()
 	if t == "'":
 	    advance()
-	    return ('quote', read(),)
+	    return (Symbol('quote'), read(),)
 	elif t == '(':
 	    advance()
 	    result = []
@@ -72,7 +73,7 @@ def read_iter(input):
 	    chars.append(t)
 	    advance()
 	    t = token()
-        return intern(''.join(chars))
+        return Symbol(''.join(chars))
 
     def read_string():
 	advance()
@@ -113,8 +114,17 @@ def write(sexpr):
     if is_list(sexpr):
 	return '(%s)' % ' '.join(map(write, sexpr))
     if is_symbol(sexpr):
-        return sexpr
+        return sexpr.get_name() # XXX may need escaping
+    if is_string(sexpr):
+        return write_string(sexpr)
     if is_bool(sexpr):
         return '#t' if sexpr else '#f'
-    # XXX check for strings here
     return repr(sexpr)
+
+def write_string(s):
+    # XXX ugh ugly
+    x = repr(s)
+    if x.startswith("'"):
+        middle = x[1:-1]
+        return '"%s"' % middle.replace('"', r'\"')
+    return x
