@@ -79,7 +79,6 @@ def add_process_functions(enclosing_scope, run_queue):
             return Clutch(locals())
         def send(message):
             process.accept(message, run_queue)
-            return True
         send_fn = Primitive(send)
         def Receive():
             def to_call(args, k):
