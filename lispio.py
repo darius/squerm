@@ -43,6 +43,9 @@ def read_iter(input):
 	if t == "'":
 	    advance()
 	    return (Symbol('quote'), read(),)
+	elif t == ".":
+	    advance()
+	    return (Symbol('selector'), read(),)
 	elif t == '(':
 	    advance()
 	    result = []

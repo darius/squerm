@@ -8,10 +8,10 @@ def _make_symbols(string):
 
 _and, _begin, _cond, _case, _define, _else, _equalP = \
     _make_symbols('and begin cond case define else equal?')
-_fail, _if, _lambda, _let, _local, _main, _member, _or = \
-    _make_symbols('fail if lambda let local main member or')
-_p, _quote = \
-    _make_symbols('p quote')
+_fail, _if, _lambda, _let, _local, _main, _make_selector, _member, _or = \
+    _make_symbols('fail if lambda let local main make-selector member or')
+_p, _quote, _selector = \
+    _make_symbols('p quote selector')
 _arrow = Symbol('=>')
 
 
@@ -215,12 +215,16 @@ def macro_or(exp):
 		      cadr(exp),
 		      mklist(_lambda, (), cons(_or, cddr(exp))))
 
+def macro_selector(exp):
+    return mklist(_make_selector, mklist(_quote, cadr(exp)))
+
 macros = {
     _and:        macro_and,
     _case:       macro_case,
     _cond:       macro_cond,
     _let:        macro_let,
     _or:         macro_or,
+    _selector:   macro_selector,
     }
 
 def lmap(f, *xs): 

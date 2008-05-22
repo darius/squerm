@@ -29,6 +29,8 @@ def Apply():
     return Clutch(locals())
 
 def make_selector(method_name):
+    if is_symbol(method_name):
+        method_name = method_name.get_name()
     assert isinstance(method_name, basestring)
     assert not method_name.startswith('_')
     return Selector(method_name)
