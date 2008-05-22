@@ -2,3 +2,25 @@ Squerm
 Copyright (c) 2008 by Darius Bacon http://accesscom.com/~darius
 Distributed under GNU General Public Licence v3
 http://www.gnu.org/licenses/gpl.html
+
+This is a kind of melange of Scheme and Erlang; some Squeak influence
+may come in later, too. It's a toy implementation to play with the
+language design.
+
+As a language design this may be an ugly marriage: why have both
+procedures and processes? Wouldn't it be more beautiful with just one
+kind of thing? If you start down that road, you end up with Actors
+(and when nobody joins you there yet, you come back with E). Erlang
+shows a pragmatic compromise that I'd like to explore more: processes
+with granularity in between Unix processes and actors.
+
+Erlang's influence makes Squerm 'purer' than Scheme: the only side
+effects are from sending and receiving messages or raising exceptions
+(which become messages to a 'keeper'). Scheme's influence conversely
+purifies Erlang: instead of process IDs in a global namespace, we have
+capabilities to send and receive messages.
+
+To try it out:
+
+>>> import run
+>>> run.testme()
