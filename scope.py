@@ -9,7 +9,8 @@ class ScopeClass(Clutch):
 
 def EmptyScope():
     def to_get(var):
-        raise 'Unbound variable', var # XXX make an Exception instance
+         # XXX what type of exception should this be?
+        raise Exception('Unbound variable', var)
     return ScopeClass(locals())
 
 def OuterScope(frame):
