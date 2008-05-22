@@ -6,6 +6,6 @@
   '(local 
     ((define (revappend xs ys)
        (if (null? xs)
-	   ys
-	   (revappend (cdr xs) (cons (car xs) ys)))))
+           ys
+           (revappend (cdr xs) (cons (car xs) ys)))))
     (revappend '(a b c) '(d))))
