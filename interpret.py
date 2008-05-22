@@ -14,6 +14,7 @@ def StartingEvalState(expr, scope):
     def to_is_runnable(): return True
     def to_step():        return expr.eval(scope, FinalK())
     def to_trace():       return '<starting>'
+    def to___repr__():    return '<starting %r>' % expr
     return Clutch(locals())
 
 
