@@ -24,4 +24,6 @@ def ev(definitions):
 
 def evaluate(run_queue, definitions, scope):
 #    print lispio.write(syntax.expand_toplevel(definitions))
-    interpret.run(run_queue, syntax.expand_toplevel(definitions), scope)
+    keeper = initialscope.ComplainingKeeper()
+    expr = syntax.expand_toplevel(definitions)
+    interpret.run(run_queue, keeper, expr, scope)

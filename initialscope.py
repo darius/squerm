@@ -27,6 +27,25 @@ def Apply():
         return '#<primitive apply>'
     return Clutch(locals())
 
+def make_selector(method_name):
+    assert isinstance(method_name, basestring)
+    assert not method_name.startswith('_')
+    return Selector(method_name)
+
+# Whitelist of types whose methods preserve capability discipline.
+invocable_types = (basestring, frozenset)
+
+def Selector(method_name):
+    def to_call(args, k):
+        object = args[0]
+        assert isinstance(object, invocable_types)
+        arguments = args[1:]
+        return RunningState(getattr(object, method_name)(*arguments),
+                            k)
+    def to___repr__():
+        return '#<selector %s>' % method_name
+    return Clutch(locals())
+
 def Eval():
     def to_call(args, k):
         sexpr, scope = args
@@ -44,12 +63,26 @@ def extend_environment(vars, vals, scope):
     assert len(vars) == len(vals)
     return Scope(vars, vals, scope)
 
+def ComplainingKeeper():
+    def to_send(message):
+        print message
+    def to_call(args, k):
+        (message,) = args
+        to_send(message)
+        return RunningState(None, k)        
+    def to___repr__():
+        return '#<! complaining-keeper>'
+    return SenderClass(locals())
+
 prims = dict((name, Primitive(fn)) for name, fn in primitives_dict.items())
-prims.update({'apply': Apply(),
-              'eval':  Eval(),
-              'None':  None,
-              'empty-environment': EmptyScope(),
-              'extend-environment': Primitive(extend_environment)})
+prims.update({'apply':              Apply(),
+              'make-selector':      Primitive(make_selector),
+              'eval':               Eval(),
+              'None':               None,
+              'empty-environment':  EmptyScope(),
+              'extend-environment': Primitive(extend_environment),
+              'complaining-keeper': ComplainingKeeper(),
+              })
 
 def RecursiveScopeExpr():
     def to_make_closure(scope): return scope

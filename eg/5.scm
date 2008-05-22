@@ -1,0 +1,6 @@
+(define (main)
+  (print ((make-selector 'startswith) 'hello 'hell))
+  (print ((make-selector 'startswith) 'hello 'heaven))
+  (print ((make-selector 'replace) 'hello 'hell 'heaven))
+  (print ((make-selector 'starts-with) 'hello 'heaven))
+  )

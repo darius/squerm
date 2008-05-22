@@ -6,8 +6,8 @@ from scope      import RecursiveScope, Scope
 
 # Processes
 
-def run(run_queue, expr, scope):
-    run_queue.enqueue(Process(False, StartingEvalState(expr, scope)))
+def run(run_queue, opt_keeper, expr, scope):
+    run_queue.enqueue(Process(opt_keeper, StartingEvalState(expr, scope)))
     run_queue.run()
 
 def StartingEvalState(expr, scope):
