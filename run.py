@@ -7,7 +7,7 @@ import syntax
 
 
 def testme():
-    for p in range(4):
+    for p in range(5):
         print '%d:' % p
         runfile('eg/%d.scm' % p)
 
