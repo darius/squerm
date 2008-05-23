@@ -1,3 +1,5 @@
+import glob
+
 import initialscope
 import interpret
 import lispio
@@ -7,9 +9,9 @@ import syntax
 
 
 def testme():
-    for p in range(6):
-        print '%d:' % p
-        runfile('eg/%d.scm' % p)
+    for filename in glob.glob('eg/*.scm'):
+        print '%s:' % filename
+        runfile(filename)
 
 def runfile(filename):
     run(open(filename).read())
