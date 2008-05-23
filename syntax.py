@@ -106,7 +106,7 @@ gensym_counter = 0
 def gensym():
     global gensym_counter
     gensym_counter += 1
-    return '#G%s' % gensym_counter
+    return Symbol('#G%s' % gensym_counter)
 
 def make_begin(exps):
     if len(exps) == 1:
