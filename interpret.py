@@ -141,7 +141,8 @@ def LambdaExpr(variables, expr):
     def to_eval(scope, k):
 	return RunningState(Procedure(scope, variables, expr), k)
     def to___repr__():
-        return '(lambda (%s) %r)' % (' '.join(variables), expr)
+        return '(lambda (%s) %r)' % (' '.join(map(repr, variables)),
+                                     expr)
     def to_make_closure(scope):
         return Procedure(scope, variables, expr)
     return LambdaExprClass(locals())
