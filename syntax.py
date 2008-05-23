@@ -25,7 +25,7 @@ def expand_exp(the_exp):
     def expand(exp):
 	if is_symbol(exp):
 	    return VarRefExpr(exp)
-	if is_null(exp) or is_bool(exp) or is_string(exp):
+	if is_null(exp) or is_bool(exp) or is_string(exp) or is_number(exp):
 	    return ConstantExpr(exp)
         assert is_pair(exp)
 	rator = car(exp)

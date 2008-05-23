@@ -1,9 +1,12 @@
+import operator
+
 from symbols import Symbol, SymbolClass
 
 
 # Primitive procedures
 
 def is_bool(x):    return isinstance(x, bool)
+def is_number(x):  return isinstance(x, (int, long, float))
 def is_string(x):  return isinstance(x, basestring)
 def is_symbol(x):  return isinstance(x, SymbolClass)
 def is_list(x):    return isinstance(x, tuple)
@@ -62,4 +65,18 @@ primitives_dict = {
     'equal?':  lambda x, y: x == y,
     'not':     lambda arg: x is False,
     'member':  member,
+    '+':       operator.add,
+    '-':       operator.sub,    # XXX unary -?
+    '*':       operator.mul,
+    '/':       operator.truediv,
+    'quotient':  operator.div,
+    'remainder': operator.mod,
+#    'modulo': operator.,
+    'abs':     operator.abs,
+    '<':       operator.lt,     # XXX do we want Python's behavior?
+    '<=':      operator.le,
+    '=':       operator.eq,
+    '>':       operator.gt,
+    '>=':      operator.ge,
+    'expt':    operator.pow,
 }

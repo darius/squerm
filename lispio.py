@@ -76,7 +76,14 @@ def read_iter(input):
 	    chars.append(t)
 	    advance()
 	    t = token()
-        return Symbol(''.join(chars))
+	string = ''.join(chars)
+	try:
+	    return int(string)
+	except ValueError:
+	    try:
+		return float(string)
+	    except ValueError:
+		return Symbol(string)
 
     def read_string():
 	advance()
