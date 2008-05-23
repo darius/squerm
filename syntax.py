@@ -6,8 +6,8 @@ from primitives import *
 def _make_symbols(string):
     return map(Symbol, string.split())
 
-_and, _begin, _cond, _case, _define, _else, _equalP = \
-    _make_symbols('and begin cond case define else equal?')
+_and, _begin, _cond, _case, _define, _else, _equalP, _exit = \
+    _make_symbols('and begin cond case define else equal? exit')
 _fail, _if, _lambda, _let, _local, _main, _make_selector, _member, _or = \
     _make_symbols('fail if lambda let local main make-selector member or')
 _p, _quote, _selector = \
@@ -33,9 +33,7 @@ def expand_exp(the_exp):
 	    return expanders[rator](exp)
 	if is_symbol(rator) and rator in macros:
 	    return expand(macros[rator](exp))
-	fn = expand(rator)
-	arguments = tuple(expand(e) for e in cdr(exp))
-	return CallExpr(fn, arguments)
+	return CallExpr(expand(rator), lmap(expand, cdr(exp)))
 
     # XXX check syntax
 
@@ -50,10 +48,10 @@ def expand_exp(the_exp):
 			     expand(make_begin(cdr(exps))))
 
     def expand_if(exp):
-	else_expr = (False if len(exp) == 3 else exp[3])
+	else_exp = (False if len(exp) == 3 else exp[3])
 	return IfExpr(expand(cadr(exp)),
 		      expand(caddr(exp)),
-		      expand(else_expr))
+		      expand(else_exp))
 
     def expand_lambda(exp):
 	return LambdaExpr(cadr(exp), expand(make_begin(cddr(exp))))
@@ -68,13 +66,13 @@ def expand_exp(the_exp):
         # N.B. not an expression type
 	if is_symbol(cadr(exp)):
 	    variable = cadr(exp)
-	    value_expr = caddr(exp)
+	    value_exp = caddr(exp)
 	elif is_pair(cadr(exp)):
 	    variable = car(cadr(exp))
-	    value_expr = cons(_lambda, cons(cdr(cadr(exp)), cddr(exp)))
+	    value_exp = cons(_lambda, cons(cdr(cadr(exp)), cddr(exp)))
 	else:
 	    raise 'Bad syntax', exp
-	return (variable, expand(value_expr))
+	return (variable, expand(value_exp))
 
     def expand_quote(exp):
 	return ConstantExpr(cadr(exp))
@@ -128,17 +126,17 @@ def macro_and(exp):
 def macro_case(exp):
     subject = cadr(exp)
     clauses = cddr(exp)
-    defaults = (clauses[-1][0] == _else)
-    if defaults:
+    if clauses and clauses[-1][0] == _else:
 	default_exps = cdr(clauses[-1])
 	clauses = clauses[:-1]
+    else:
+        default_exps = mklist(mklist(_exit, "case match failed"))
     # (case subject ((x y) exp) ... (else default)) ==>
     # (let ((var subject)) (cond ((member var '(x y)) exp) ... (else default)))
     var = gensym()
     branches = [translate_case_clause(var, car(clause), cdr(clause))
 		for clause in clauses]
-    if defaults:
-	branches.append(cons(_else, default_exps))
+    branches.append(cons(_else, default_exps))
     return mklist(mklist(_lambda, mklist(var), 
 			 cons(_cond, tuple(branches))),
 		  subject)
@@ -153,7 +151,7 @@ def translate_case_clause(var, constants, exps):
 def macro_cond(exp):
     if len(exp) == 1:
 	# (cond) ==> #f
-	r = False
+	r = mklist(mklist(_exit, "no cond clause taken"))
     elif len(exp) == 2 and car(cadr(exp)) == _else:
 	# (cond (else x...)) ==> (begin x...)
 	r = make_begin(cdr(cadr(exp)))
