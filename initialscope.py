@@ -5,8 +5,8 @@ from clutch     import Box, Clutch
 import interpret
 import lispio
 from primitives import is_list, is_symbol, primitives_dict
-from processes  import Primitive, RunningState, Process, \
-                       Sender, SenderClass, sprout
+from processes  import Primitive, RunningState, Process, ReceiverClass, \
+                       Sender, SenderClass, sprout, WaitingState
 from scope      import EmptyScope, OuterScope, RecursiveScope, Scope, ScopeClass
 from symbols    import Symbol
 import syntax
@@ -66,10 +66,23 @@ def ComplainingKeeper():
     def to_call(args, k):
         (message,) = args
         to_send(message)
-        return RunningState(None, k)        
+        return RunningState(None, k)
     def to___repr__():
         return '#<! complaining-keeper>'
     return SenderClass(locals())
+
+def Choose():
+    def to_call(args, k):
+        (choices,) = args
+        assert is_list(choices)
+        for choice in choices:
+            assert is_list(choice) and len(choice) == 2
+            receiver, fn = choice
+            assert isinstance(receiver, ReceiverClass)
+        return WaitingState(choices, k)
+    def to___repr__():
+        return '#<primitive choose>'
+    return Clutch(locals())
 
 prims = dict((name, Primitive(fn)) for name, fn in primitives_dict.items())
 prims.update({'apply':              Apply(),
@@ -79,6 +92,7 @@ prims.update({'apply':              Apply(),
               'empty-environment':  EmptyScope(),
               'extend-environment': Primitive(extend_environment),
               'complaining-keeper': ComplainingKeeper(),
+              'choose':             Choose(),
               })
 prims = dict((Symbol(name), value) for name, value in prims.items())
 
