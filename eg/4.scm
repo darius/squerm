@@ -6,7 +6,7 @@
                     whee))
     (sprout-spawn keeper!
                   (lambda (? !)
-                    (print '"I am OK, though")
+                    (print "I am OK, though")
                     (print 'hurray!)))))
 
 (define (keeper ? !)
