@@ -24,7 +24,7 @@ def Process(opt_keeper, initial_state):
     def to_is_runnable():
         return state._.is_runnable()
     def to_step():
-#        print 'trace:', state._.trace()
+#        print 'trace %x:' % id(process), state._.trace()
         try:
             state._ = state._.step()
         except Exception, e:    # XXX is this the right type to catch?
@@ -47,7 +47,7 @@ def WaitingState(choices, k):
                 return action.call((receiver.pop(),), k)
         assert False
     def to_trace():
-        return '<waiting-on %r>' % choices
+        return '<waiting-on %r>' % (choices,)
     def to___repr__():
         return '<waiting; %r>' % k
     return Clutch(locals())
