@@ -31,8 +31,8 @@ def member(key, ls):
 	    return ls[i:]
     return False
 
-def car(x): return x[0]
-def cdr(x): return x[1:]
+def car(x): assert is_list(x); return x[0]
+def cdr(x): assert is_list(x) and 1 <= len(x); return x[1:]
 def caar(x): return car(car(x))
 def cadr(x): return car(cdr(x))
 def cdar(x): return cdr(car(x))
