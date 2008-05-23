@@ -41,12 +41,13 @@ def WaitingState(choices, k):
     def to_is_runnable():
         return any(receiver.is_ready() for receiver, action in choices)
     def to_step():
+        # XXX what about fairness?
         for receiver, action in choices:
             if receiver.is_ready():
                 return action.call((receiver.pop(),), k)
         assert False
     def to_trace():
-        return '<waiting-on %s>' % choices
+        return '<waiting-on %r>' % choices
     def to___repr__():
         return '<waiting; %r>' % k
     return Clutch(locals())
