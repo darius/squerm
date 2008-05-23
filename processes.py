@@ -27,6 +27,10 @@ def Process(opt_keeper, initial_state):
 #        print 'trace %x:' % id(process), state._.trace()
         try:
             state._ = state._.step()
+            # XXX if we got back a StoppedState, shouldn't we also
+            #  send a message to the keeper? Or should the convention
+            #  be that you raise a 'NormalExitException' instead of
+            #  returning a StoppedState directly? Or what?
         except Exception, e:    # XXX is this the right type to catch?
             failure = Failure(e, process, state._)
             state._ = StoppedState()

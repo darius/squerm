@@ -6,7 +6,7 @@ import interpret
 import lispio
 from primitives import is_list, is_symbol, primitives_dict
 from processes  import Primitive, RunningState, Process, ReceiverClass, \
-                       Sender, SenderClass, sprout, WaitingState
+                       Sender, SenderClass, sprout, StoppedState, WaitingState
 from scope      import EmptyScope, OuterScope, RecursiveScope, Scope, ScopeClass
 from symbols    import Symbol
 import syntax
@@ -84,6 +84,16 @@ def Choose():
         return '#<primitive choose>'
     return Clutch(locals())
 
+def Exit():
+    def to_call(args, k):
+        if len(args) == 0:
+            return StoppedState()
+        (plaint,) = args
+        raise Exception(plaint)
+    def to___repr__():
+        return '#<primitive exit>'
+    return Clutch(locals())
+
 prims = dict((name, Primitive(fn)) for name, fn in primitives_dict.items())
 prims.update({'apply':              Apply(),
               'make-selector':      Primitive(make_selector),
@@ -93,6 +103,7 @@ prims.update({'apply':              Apply(),
               'extend-environment': Primitive(extend_environment),
               'complaining-keeper': ComplainingKeeper(),
               'choose':             Choose(),
+              'exit':               Exit(),
               })
 prims = dict((Symbol(name), value) for name, value in prims.items())
 
