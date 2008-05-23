@@ -1,5 +1,5 @@
 (define (main) 
-  (print (spawn #f (lambda (! ?) 
+  (print (spawn #f (lambda ()
                      (whee (list 'a)))))
   (print 'yo))
 

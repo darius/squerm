@@ -1,8 +1,8 @@
 (define (main)
-  (spawn #f main-process))
+  (sprout-spawn #f main-process))
 
 (define (main-process ? !)
-  (let ((sub! (spawn #f subprocess)))
+  (let ((sub! (sprout-spawn #f subprocess)))
     (sub! (list 'hello !))
     (print (list 'main-got-back (?)))))
 
@@ -10,3 +10,15 @@
   (let ((msg (?)))
     (print (list 'sub-got (car msg)))
     ((cadr msg) 'reply)))
+
+(define (sprout-spawn keeper fn)
+  (let ((pair (sprout)))
+    (let ((initial-? (car pair))
+          (initial-! (cadr pair)))
+      (spawn keeper (lambda ()
+                      (let ((pair (sprout)))
+                        (let ((? (car pair))
+                              (! (cadr pair)))
+                          (initial-! !)
+                          (fn ? !)))))
+      (initial-?))))

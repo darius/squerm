@@ -20,8 +20,7 @@ def RunQueue():
     return Clutch(locals())
 
 def Process(opt_keeper, initial_state):
-    state   = Box(initial_state)
-    mailbox = Mailbox()
+    state = Box(initial_state)
     def to_is_runnable():
         return state._.is_runnable()
     def to_step():
@@ -32,35 +31,79 @@ def Process(opt_keeper, initial_state):
             failure = Failure(e, process, state._)
             state._ = StoppedState()
             if opt_keeper:
-                opt_keeper.send(failure) # XXX
-    def to_accept(message, run_queue):
-        # XXX a stopped process should drop messages immediately
-        was_runnable = state._.is_runnable()
-        mailbox.put(message)
-        if not was_runnable:
-            run_queue.enqueue(process)
-    def to_receive(k):
-        new_state = WaitingState(mailbox, k)
-        if new_state.is_runnable():
-            return new_state.step()
-        return new_state
+                opt_keeper.send(failure)
     def to___repr__():
         return '#<process %x>' % id(process)
     process = Clutch(locals())
     return process
 
-class SenderClass(Clutch):
-    pass
+def WaitingState(choices, k):
+    def to_is_runnable():
+        return any(receiver.is_ready() for receiver, action in choices)
+    def to_step():
+        for receiver, action in choices:
+            if receiver.is_ready():
+                return action.call((receiver.pop(),), k)
+        assert False
+    def to_trace():
+        return '<waiting-on %s>' % choices
+    def to___repr__():
+        return '<waiting; %r>' % k
+    return Clutch(locals())
 
-def Sender(process, run_queue):
+def sprout(process, run_queue):
+    """Return a new receiver/sender pair."""
+    receiver = Receiver(process, run_queue)
+    return receiver, Sender(receiver)
+
+class ReceiverClass(Clutch): pass
+class SenderClass(Clutch): pass
+
+def Receiver(process, run_queue):
+    messages = []
+
+    # The first two methods are called only by process in WaitingState:
+    def to_is_ready(): return not not messages
+    def to_pop():      return messages.pop(0)  # XXX O(len(messages)) time
+
+    # This method is called only by the corresponding sender:
+    def to_accept(message):
+        # TODO: just drop the message if process has stopped
+        was_runnable = process.is_runnable()
+        messages.append(message)
+        if not was_runnable:
+            run_queue.enqueue(process)
+
+    # These are called by the interpreter:
+    def to_call(args, k):
+        assert () == args
+        assert process == run_queue.get_running_process()
+        choice = (receiver, identity_fn)
+        return WaitingState((choice,), k)
+    def to___repr__():
+        return '#<? %x %r>' % (id(receiver), process)
+
+    receiver = ReceiverClass(locals())
+    return receiver
+
+def Primitive(fn):
+    def to_call(args, k):
+        return RunningState(fn(*args), k)
+    def to___repr__():
+        return '#<primitive %s>' % fn.__name__
+    return Clutch(locals())
+
+identity_fn = Primitive(lambda x: x)
+
+def Sender(receiver):
     def to_send(message):
-        process.accept(message, run_queue)
+        receiver.accept(message)
     def to_call(args, k):
         (message,) = args
         to_send(message)
         return RunningState(None, k)        
     def to___repr__():
-        return '#<! %r>' % process
+        return '#<! %x>' % id(receiver)
     return SenderClass(locals())
 
 def Failure(exception, process, state):
@@ -75,26 +118,9 @@ def RunningState(value, k):
     def to___repr__():    return repr((value, k))
     return Clutch(locals())
 
-def WaitingState(mailbox, k):
-    def to_is_runnable(): return not mailbox.is_empty()
-    def to_step():        return k.step(mailbox.pop())
-    def to_trace():       return '<waiting-on %s>' % mailbox
-    def to___repr__():    return '<waiting; %r>' % k
-    return Clutch(locals())
-
 def StoppedState():
     def to_is_runnable(): return False
     def to_step():        assert False
     def to_trace():       return '<stopped>'
     def to___repr__():    return '<stopped>'
-    return Clutch(locals())
-
-def Mailbox():
-    messages = []
-    def to_is_empty():
-        return not messages
-    def to_put(message):
-        messages.append(message)
-    def to_pop():
-        return messages.pop(0)  # XXX inefficient
     return Clutch(locals())

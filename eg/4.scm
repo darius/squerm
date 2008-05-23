@@ -1,15 +1,27 @@
 (define (main)
-  (let ((keeper! (spawn #f keeper)))
-    (spawn keeper!
-           (lambda (? !)
-             (print 'hello)
-             whee))
-    (spawn keeper!
-           (lambda (? !)
-             (print '"I am OK, though")
-             (print 'hurray!)))))
+  (let ((keeper! (sprout-spawn #f keeper)))
+    (sprout-spawn keeper!
+                  (lambda (? !)
+                    (print 'hello)
+                    whee))
+    (sprout-spawn keeper!
+                  (lambda (? !)
+                    (print '"I am OK, though")
+                    (print 'hurray!)))))
 
 (define (keeper ? !)
   (let loop ()
     (print (?))
     (loop)))
+
+(define (sprout-spawn keeper fn)
+  (let ((pair (sprout)))
+    (let ((initial-? (car pair))
+          (initial-! (cadr pair)))
+      (spawn keeper (lambda ()
+                      (let ((pair (sprout)))
+                        (let ((? (car pair))
+                              (! (cadr pair)))
+                          (initial-! !)
+                          (fn ? !)))))
+      (initial-?))))
