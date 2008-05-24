@@ -109,7 +109,8 @@ def ConstantExpr(value):
 
 def LetrecprocExpr(pairs, body):
     for var, proc in pairs:
-        assert isinstance(proc, LambdaExprClass)
+        assert isinstance(proc, LambdaExprClass), \
+            'Bad syntax in locals: %r' % pairs
     def to_eval(scope, k):
         return body.eval(RecursiveScope(pairs, scope), k)
     def to___str__():
@@ -151,7 +152,8 @@ class LambdaExprClass(Clutch): pass
 
 def Procedure(scope, variables, expr):
     def to_call(args, k):
-        assert len(variables) == len(args)
+        assert len(variables) == len(args), \
+            "Arguments %r don't match parameters %r" % (args, variables)
 	return expr.eval(Scope(variables, args, scope), k)
     def to___repr__():
         return '#<procedure>'

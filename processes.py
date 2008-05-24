@@ -49,7 +49,7 @@ def WaitingState(choices, k):
         for receiver, action in choices:
             if receiver.is_ready():
                 return action.call((receiver.pop(),), k)
-        assert False
+        assert False, 'WaitingState stepped when not runnable'
     def to_trace():
         return '<waiting-on %r>' % (choices,)
     def to___repr__():
@@ -81,8 +81,9 @@ def Receiver(process, run_queue):
 
     # These are called by the interpreter:
     def to_call(args, k):
-        assert () == args
-        assert process == run_queue.get_running_process()
+        assert () == args, 'Receiver takes no arguments: %r' % args
+        assert process == run_queue.get_running_process(), \
+            'Receiver %r called from wrong process' % receiver
         choice = (receiver, identity_fn)
         return WaitingState((choice,), k)
     def to___repr__():
@@ -125,7 +126,7 @@ def RunningState(value, k):
 
 def StoppedState():
     def to_is_runnable(): return False
-    def to_step():        assert False
+    def to_step():        assert False, 'Stopped process stepped'
     def to_trace():       return '<stopped>'
     def to___repr__():    return '<stopped>'
     return Clutch(locals())

@@ -27,7 +27,8 @@ def RecursiveScope(pairs, enclosing):
     return scope
 
 def _make_scope(frame, enclosing):
-    assert isinstance(enclosing, ScopeClass)
+    assert isinstance(enclosing, ScopeClass), \
+        'Enclosing environment not an environment: %r' % enclosing
     def to_get(var):
         return frame[var] if var in frame else enclosing.get(var)
     return ScopeClass(locals())

@@ -16,26 +16,35 @@ def mklist(*args): return tuple(args)
 def append(x, y):  return tuple(x) + y
 
 def cons(x, y):
-    assert is_list(y)
+    assert is_list(y), 'Second argument to cons must be a list: %r' % y
     return (x,) + y
 
 def assoc(key, alist):
-    assert is_list(alist)
+    assert is_list(alist), \
+        'Second argument to assoc must be an a-list: %r' % alist
     for pair in alist:
-        assert is_list(pair)
+        assert is_list(pair), \
+            'Second argument to assoc must be an a-list: %r' % alist
 	if pair[0] == key:
 	    return pair
     return False
 
 def member(key, ls):
-    assert is_list(ls)
+    assert is_list(ls), 'Second argument to member must be a list: %r' % ls
     for i, element in enumerate(ls):
 	if key == element:
 	    return ls[i:]
     return False
 
-def car(x): assert is_list(x); return x[0]
-def cdr(x): assert is_list(x) and 1 <= len(x); return x[1:]
+def car(x):
+    assert is_list(x) and 1 <= len(x), \
+        'Argument to car must be a nonnull list: %r' % x
+    return x[0]
+def cdr(x):
+    assert is_list(x) and 1 <= len(x), \
+        'Argument to cdr must be a nonnull list: %r' % x
+    return x[1:]
+
 def caar(x): return car(car(x))
 def cadr(x): return car(cdr(x))
 def cdar(x): return cdr(car(x))

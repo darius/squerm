@@ -27,7 +27,7 @@ def expand_exp(the_exp):
 	    return VarRefExpr(exp)
 	if is_null(exp) or is_bool(exp) or is_string(exp) or is_number(exp):
 	    return ConstantExpr(exp)
-        assert is_pair(exp)
+        assert is_pair(exp), 'Non-self-evaluating literal: %r' % exp
 	rator = car(exp)
 	if is_symbol(rator) and rator in expanders:
 	    return expanders[rator](exp)
