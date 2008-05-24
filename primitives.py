@@ -44,12 +44,26 @@ def caddr(x): return car(cdr(cdr(x)))
 def cdddr(x): return cdr(cdr(cdr(x)))
 def cadddr(x): return car(cdr(cdr(cdr(x))))
 
+def sub(*args):
+    if 1 == len(args):
+        return -args[0]
+    if 2 == len(args):
+        return args[0] - args[1]
+    raise TypeError('- expected 1 or 2 arguments')
+
 primitives_dict = {
-    'pair?':   is_pair,
-    'null?':   is_null,
+    'boolean?': is_bool,
+    'number?': is_number,
     'string?': is_string,
     'symbol?': is_symbol,
     'list?':   is_list,
+    'pair?':   is_pair,
+    'null?':   is_null,
+    'list':    mklist,
+    'append':  append,
+    'cons':    cons,
+    'assoc':   assoc,
+    'member':  member,
     'car':     car,
     'cdr':     cdr,
     'caar':    caar,
@@ -58,15 +72,10 @@ primitives_dict = {
     'cddr':    cddr,
     'caddr':   caddr,
     'cadddr':  cadddr,
-    'cons':    cons,
-    'list':    mklist,
-    'append':  append,
-    'assoc':   assoc,
     'equal?':  lambda x, y: x == y,
-    'not':     lambda arg: x is False,
-    'member':  member,
+    'not':     lambda x: x is False,
     '+':       operator.add,
-    '-':       operator.sub,    # XXX unary -?
+    '-':       sub,
     '*':       operator.mul,
     '/':       operator.truediv,
     'quotient':  operator.div,
