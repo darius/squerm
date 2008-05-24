@@ -1,5 +1,5 @@
 (define (main)
-  (call-with-channel
+  (with-new-channel
    (lambda (t-? t-!)
      (let ((dict! (sprout-spawn complaining-keeper (make-dict-process t-!))))
        (let ((kill-dict! (t-?)))
@@ -11,7 +11,7 @@
 
 (define (make-dict-process t-!)
   (lambda (? !)
-    (call-with-channel
+    (with-new-channel
      (lambda (kill-? kill-!)
        (t-! kill-!)
        (let loop ((table '()))
@@ -37,23 +37,21 @@
   (cons (list key value) a-list))
 
 (define (sprout-spawn keeper fn)
-  (let ((pair (sprout)))
-    (let ((initial-? (car pair))
-          (initial-! (cadr pair)))
-      (spawn keeper (lambda ()
-                      (let ((pair (sprout)))
-                        (let ((? (car pair))
-                              (! (cadr pair)))
-                          (initial-! !)
-                          (fn ? !)))))
-      (initial-?))))
+  (with-new-channel
+   (lambda (initial-? initial-!)
+     (spawn keeper (lambda ()
+                     (with-new-channel
+                      (lambda (? !)
+                        (initial-! !)
+                        (fn ? !)))))
+     (initial-?))))
 
-(define (call-with-channel f)
+(define (with-new-channel f)
   (let ((pair (sprout)))
     (f (car pair) (cadr pair))))
 
 (define (call server! message)
-  (call-with-channel
+  (with-new-channel
    (lambda (? !)
      (server! (list ! message))
      (?))))

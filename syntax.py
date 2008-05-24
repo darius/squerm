@@ -13,6 +13,8 @@ _fail, _if, _lambda, _let, _local, _main, _make_selector, _member, _or = \
 _p, _quote, _selector = \
     _make_symbols('p quote selector')
 _arrow = Symbol('=>')
+_append, _cons, _quasiquote, _unquote, _unquote_splicing = \
+    _make_symbols('append cons quasiquote unquote unquote-splicing')
 
 
 # Concrete syntax
@@ -216,6 +218,40 @@ def macro_or(exp):
 def macro_selector(exp):
     return mklist(_make_selector, mklist(_quote, cadr(exp)))
 
+def macro_quasiquote(exp):
+    # XXX doesn't do nesting
+    return qquote(cadr(exp))
+
+def qquote(exp):
+    if not is_pair(exp):
+	if is_constant(exp): return exp
+	return mklist(_quote, exp)
+    if car(exp) == _unquote:
+	return cadr(exp)
+    if is_pair(car(exp)) and caar(exp) == _unquote_splicing:
+	if is_null(cdr(exp)):
+	    return cadar(exp)
+	return mklist(_append, cadar(exp), qquote(cdr(exp)))
+    return combine_skeletons(qquote(car(exp)), qquote(cdr(exp)), exp)
+
+def combine_skeletons(left, right, exp):
+    if is_constant(left) and is_constant(right):
+	L, R = qquote_eval(left), qquote_eval(right)
+	if car(exp) == L and cdr(exp) == R:
+	    return mklist(_quote, exp)
+	return mklist(_quote, cons(L, R))
+    return mklist(_cons, left, right)
+
+def qquote_eval(constant):
+    if is_pair(constant):	# Is this a (quote foo) form?
+	return cadr(constant)
+    return constant
+
+def is_constant(exp):
+    if is_pair(exp):
+	return car(exp) == _quote
+    return is_number(exp)	# XXX more cases
+
 macros = {
     _and:        macro_and,
     _case:       macro_case,
@@ -223,6 +259,7 @@ macros = {
     _let:        macro_let,
     _or:         macro_or,
     _selector:   macro_selector,
+    _quasiquote: macro_quasiquote,
     }
 
 def lmap(f, *xs): 

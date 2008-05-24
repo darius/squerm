@@ -49,7 +49,13 @@ def caar(x): return car(car(x))
 def cadr(x): return car(cdr(x))
 def cdar(x): return cdr(car(x))
 def cddr(x): return cdr(cdr(x))
+def caaar(x): return car(car(car(x)))
+def caadr(x): return car(car(cdr(x)))
+def cadar(x): return car(cdr(car(x)))
 def caddr(x): return car(cdr(cdr(x)))
+def cdaar(x): return cdr(car(car(x)))
+def cdadr(x): return cdr(car(cdr(x)))
+def cddar(x): return cdr(cdr(car(x)))
 def cdddr(x): return cdr(cdr(cdr(x)))
 def cadddr(x): return car(cdr(cdr(cdr(x))))
 
@@ -79,7 +85,14 @@ primitives_dict = {
     'cadr':    cadr,
     'cdar':    cdar,
     'cddr':    cddr,
+    'caaar':   caaar,
+    'caadr':   caadr,
+    'cadar':   cadar,
     'caddr':   caddr,
+    'cdaar':   cdaar,
+    'cdadr':   cdadr,
+    'cddar':   cddar,
+    'cdddr':   cdddr,
     'cadddr':  cadddr,
     'equal?':  lambda x, y: x == y,
     'not':     lambda x: x is False,

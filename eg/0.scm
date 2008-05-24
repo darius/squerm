@@ -4,4 +4,5 @@
   (print 'yo))
 
 (define (whee x)
+  (print `(,x b))
   (print (cons x (cons 'b '()))))

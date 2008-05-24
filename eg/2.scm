@@ -2,10 +2,10 @@
   (let ((dict! (sprout-spawn complaining-keeper dict-process)))
     (sprout-spawn complaining-keeper
                   (lambda (? !)
-                    (dict! (list 'get 'hello !))
+                    (dict! `(get hello ,!))
                     (print (?))
-                    (dict! (list 'put 'color 'red))
-                    (dict! (list 'get 'color !))
+                    (dict! `(put color red))
+                    (dict! `(get color ,!))
                     (print (?))))))
 
 (define (dict-process ? !)

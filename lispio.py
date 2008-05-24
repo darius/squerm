@@ -46,6 +46,16 @@ def read_iter(input):
 	elif t == ".":
 	    advance()
 	    return (Symbol('selector'), read(),)
+	elif t == "`":
+	    advance()
+	    return (Symbol('quasiquote'), read(),)
+	elif t == ",":
+	    advance()
+	    t = token()
+	    if t == "@":
+		advance()
+		return (Symbol('unquote-splicing'), read(),)
+	    return (Symbol('unquote'), read(),)
 	elif t == '(':
 	    advance()
 	    result = []
