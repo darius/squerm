@@ -66,6 +66,9 @@ def sub(*args):
         return args[0] - args[1]
     raise TypeError('- expected 1 or 2 arguments')
 
+def head(x, n): return x[:n]
+def tail(x, n): return x[n:]
+
 primitives_dict = {
     'boolean?': is_bool,
     'number?': is_number,
@@ -110,4 +113,6 @@ primitives_dict = {
     '>':       operator.gt,
     '>=':      operator.ge,
     'expt':    operator.pow,
+    'head':    head,
+    'tail':    tail,
 }
