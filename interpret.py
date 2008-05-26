@@ -6,9 +6,9 @@ from scope      import RecursiveScope, Scope
 
 # Processes
 
-def run(run_queue, opt_keeper, expr, scope):
-    run_queue.enqueue(Process(opt_keeper, StartingEvalState(expr, scope)))
-    run_queue.run()
+def run(agenda, opt_keeper, expr, scope):
+    agenda.enqueue(Process(opt_keeper, StartingEvalState(expr, scope)))
+    agenda.run()
 
 def StartingEvalState(expr, scope):
     def to_is_runnable(): return True

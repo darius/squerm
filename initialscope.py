@@ -155,10 +155,10 @@ safe_scope = RecursiveScope(zip((Symbol('safe-environment'),),
                                 (RecursiveScopeExpr(),)),
                             OuterScope(prims))
 
-def make_universal_scope(run_queue):
-    return add_process_functions(safe_scope, run_queue)
+def make_universal_scope(agenda):
+    return add_process_functions(safe_scope, agenda)
 
-def add_process_functions(enclosing_scope, run_queue):
+def add_process_functions(enclosing_scope, agenda):
     def spawn(opt_keeper, fn):
         assert opt_keeper is False or isinstance(opt_keeper, SenderClass), \
             'Not a keeper: %r' % opt_keeper
@@ -169,10 +169,10 @@ def add_process_functions(enclosing_scope, run_queue):
             def to___repr__():    return '<spawning %r>' % fn
             return Clutch(locals())
         process = Process(opt_keeper, SpawningState())
-        run_queue.enqueue(process)
+        agenda.enqueue(process)
         return process
     def sprout_fn():
-        return sprout(run_queue.get_running_process(), run_queue)
+        return sprout(agenda.get_running_process(), agenda)
     # TODO: add choice function
     return Scope(map(Symbol, ('spawn', 'sprout')),
                  map(Primitive, (spawn, sprout_fn)),

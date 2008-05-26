@@ -1,7 +1,7 @@
 from clutch import Clutch, Box
 
 
-def RunQueue():
+def Agenda():
     pending_queue = []
     running_process = Box(None)
     def to_enqueue(process):
@@ -9,15 +9,18 @@ def RunQueue():
             pending_queue.append(process)
     def to_run():
         while pending_queue:
-            running = pending_queue[:]
-            del pending_queue[:]
-            for process in running:
-                running_process._ = process
-                process.step()
-                to_enqueue(process)
+            agenda.poll()
+    def to_poll():
+        running = pending_queue[:]
+        del pending_queue[:]
+        for process in running:
+            running_process._ = process
+            process.step()
+            to_enqueue(process)
     def to_get_running_process():
         return running_process._
-    return Clutch(locals())
+    agenda = Clutch(locals())
+    return agenda
 
 def Process(opt_keeper, initial_state):
     state = Box(initial_state)
@@ -56,15 +59,15 @@ def WaitingState(choices, k):
         return '<waiting; %r>' % k
     return Clutch(locals())
 
-def sprout(process, run_queue):
+def sprout(process, agenda):
     """Return a new receiver/sender pair."""
-    receiver = Receiver(process, run_queue)
+    receiver = Receiver(process, agenda)
     return receiver, Sender(receiver)
 
 class ReceiverClass(Clutch): pass
 class SenderClass(Clutch): pass
 
-def Receiver(process, run_queue):
+def Receiver(process, agenda):
     messages = []
 
     # The first two methods are called only by process in WaitingState:
@@ -77,12 +80,12 @@ def Receiver(process, run_queue):
         was_runnable = process.is_runnable()
         messages.append(message)
         if not was_runnable:
-            run_queue.enqueue(process)
+            agenda.enqueue(process)
 
     # These are called by the interpreter:
     def to_call(args, k):
         assert () == args, 'Receiver takes no arguments: %r' % args
-        assert process == run_queue.get_running_process(), \
+        assert process == agenda.get_running_process(), \
             'Receiver %r called from wrong process' % receiver
         choice = (receiver, identity_fn)
         return WaitingState((choice,), k)
