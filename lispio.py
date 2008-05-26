@@ -100,15 +100,37 @@ def read_iter(input):
 	chars = []
 	t = token()
 	while t != eof and t != '"':
-	    # XXX handle escapes
-	    chars.append(t)
-	    advance()
-	    t = token()
+            if t == '\\':
+                advance()
+                chars.append(read_escape_sequence())
+            else:
+                chars.append(t)
+                advance()
+            t = token()
 	advance()
 	result = ''.join(chars)
 	if t == eof:
 	    raise ValueError('Unterminated string constant: "' + result)
 	return result
+
+    escapes = {
+        '\\': '\\',
+        '\"': '\"',
+        'n': '\n',
+        'r': '\r',
+        # XXX add the rest
+        }
+
+    def read_escape_sequence():
+        t = token()
+        if t in escapes:
+            advance()
+            return escapes[t]
+        elif t == eof:
+	    raise ValueError('Unterminated string constant')
+        else:
+            # XXX also do hex escapes, etc.
+            raise ValueError('Unknown escape char: ' + t)
 
     def read_hash():
 	advance()
