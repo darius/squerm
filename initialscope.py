@@ -1,10 +1,11 @@
 import os
 import sys
 
+import asyncio
 from clutch     import Box, Clutch
 import interpret
 import lispio
-from primitives import is_list, is_symbol, primitives_dict
+from primitives import *
 from processes  import Primitive, RunningState, Process, ReceiverClass, \
                        Sender, SenderClass, sprout, StoppedState, WaitingState
 from scope      import EmptyScope, OuterScope, RecursiveScope, Scope, ScopeClass
@@ -173,7 +174,6 @@ def add_process_functions(enclosing_scope, agenda):
         return process
     def sprout_fn():
         return sprout(agenda.get_running_process(), agenda)
-    # TODO: add choice function
     return Scope(map(Symbol, ('spawn', 'sprout')),
                  map(Primitive, (spawn, sprout_fn)),
                  enclosing_scope)
@@ -189,7 +189,150 @@ def print_(x):
     write(x)
     newline()
 
-def make_os_scope(outer_scope):
-    return Scope(map(Symbol, ('write', 'newline', 'print', 'system')),
-                 map(Primitive, (write, newline, print_, os.system)),
+def make_os_scope(outer_scope, agenda):
+    return Scope(map(Symbol, 'write newline print system tcp-connect'.split()),
+                 (map(Primitive, (write, newline, print_, os.system))
+                  + [TcpConnect(agenda.get_monitor())]),
                  outer_scope)
+
+def TcpConnect(monitor):
+    def tcp_connect(sender, address, keeper):
+        assert isinstance(sender, SenderClass), \
+            'First argument should be a sender'
+        assert (is_list(address)
+                and len(address) == 2
+                and is_string(car(address))
+                and is_number(cadr(address))), \
+                'Second argument should be a (host port) pair'
+        assert isinstance(keeper, SenderClass), \
+            'Third argument should be a sender'
+        ConnectingReactor(monitor, address, keeper, sender)
+        return None
+    return Primitive(tcp_connect)
+
+class ConnectingReactor(asyncio.ClientSocketReactor):
+    def __init__(self, monitor, address, keeper, sender):
+        asyncio.ClientSocketReactor.__init__(self, monitor, address)
+        self.keeper = keeper
+        self.sender = sender
+    def poll_readable(self):
+        return False
+    def on_connect(self):
+        self.monitor.withdraw(self.socket.fileno())
+        cr = ConnectedReactor(self.monitor, self.socket, self.address,
+                              self.keeper)
+        demands_r = ReactorReceiver(cr)
+        demands_s = Sender(demands_r)
+        self.sender.send(demands_s)
+    def on_write(self):
+        pass
+    def dequeue_demands(self):
+        pass
+
+def ReactorReceiver(reactor):
+    def to_accept(message):
+        reactor.enqueue_demand(message)
+    return ReceiverClass(locals())
+
+class ConnectedReactor(asyncio.SocketStreamReactor):
+
+    def __init__(self, monitor, socket, address, keeper):
+        asyncio.SocketStreamReactor.__init__(self,
+                                             monitor, socket, address, True)
+        self.keeper       = keeper
+        self.demands      = []
+        self.readable     = False
+        self.read_k       = None
+        self.writable     = False
+        self.write_string = None
+        self.write_k      = None
+        self.write_must_complete = False
+        self.write_count  = 0
+
+    def enqueue_demand(self, message):
+        self.demands.append(message)
+
+    def dequeue_demands(self):
+        # To be called once before monitor.poll()
+        while self.demands:
+            demand = self.demands[0]
+            if not is_list(demand):
+                self.exit('Bad message to reactor-receiver')
+                break
+            if demand == (_close,):
+                self.exit()
+                break
+            elif len(demand) == 3 and demand[0] == _read:
+                if self.readable:
+                    # We already have a read to handle; put off
+                    # remaining messages till the next round.
+                    break
+                _, n_bytes, k = demand
+                if not isinstance(n_bytes, int) or n_bytes <= 0:
+                    self.exit('Bad #bytes in read')
+                    break
+                if not isinstance(k, SenderClass):
+                    self.exit('Bad sender in read')
+                    break
+                self.readable = True
+                self.read_buffer_size = n_bytes
+                self.read_k = k
+                self.demands.pop(0) # XXX inefficient
+            elif len(demand) == 3 and demand[0] == _write:
+                if self.writable:
+                    # We already have a write to perform; for this
+                    # subsequent one to make any sense, we must not
+                    # do only a partial write on the current one.
+                    self.write_must_complete = True
+                    break
+                _, string, k = demand
+                if not isinstance(string, basestring):
+                    self.exit('Bad string in write')
+                    break
+                if not isinstance(k, SenderClass):
+                    self.exit('Bad sender in write')
+                    break
+                self.writable = True
+                self.write_string = string
+                self.write_k = k
+                self.demands.pop(0) # XXX inefficient
+            else:
+                self.exit('Bad message to reactor-receiver')
+                break
+
+    def poll_readable(self):
+        return self.readable
+
+    def on_read(self, data):
+        self.read_k.send(data)
+        self.readable = False
+        self.read_k = None
+
+    def poll_writable(self):
+        return self.writable
+
+    def on_write(self):
+        n = self.send(self.write_string)
+        if self.write_must_complete and n < len(self.write_string):
+            self.write_string = self.write_string[n:]
+            self.write_count += n
+        else:
+            self.write_k.send(self.write_count + n)
+            self.writable     = False
+            self.write_string = None
+            self.write_k      = None
+            self.write_must_complete = False
+            self.write_count  = 0
+
+    def exit(self, opt_plaint=None):
+        if opt_plaint is not None:
+            self.keeper.send(opt_plaint)
+        self.on_close()
+
+    def on_close(self):
+        if self.read_k is not None:
+            self.read_k.send(_eof)
+        asyncio.SocketStreamReactor.on_close(self)
+        # XXX notify keeper too?
+
+_close, _eof, _read, _write = map(Symbol, 'close eof read write'.split())

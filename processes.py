@@ -1,16 +1,26 @@
+import asyncio
 from clutch import Clutch, Box
 
-
 def Agenda():
-    pending_queue = []
+    pending_queue   = []
     running_process = Box(None)
+    monitor         = asyncio.Monitor()
     def to_enqueue(process):
         if process.is_runnable():
             pending_queue.append(process)
     def to_run():
-        while pending_queue:
+        while agenda.has_work():
             agenda.poll()
+    def to_has_work():
+        return not not pending_queue or monitor.has_work()
     def to_poll():
+        agenda.run_pending()
+        for reactor in monitor.get_reactors():
+            # TODO: we should need to do this only for reactors that
+            #  have received demands since the last time through
+            reactor.dequeue_demands()
+        monitor.poll(0 if pending_queue else None)
+    def to_run_pending():
         running = pending_queue[:]
         del pending_queue[:]
         for process in running:
@@ -19,6 +29,8 @@ def Agenda():
             to_enqueue(process)
     def to_get_running_process():
         return running_process._
+    def to_get_monitor():
+        return monitor
     agenda = Clutch(locals())
     return agenda
 

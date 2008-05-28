@@ -22,7 +22,8 @@ def run(s):
 def ev(definitions):
     agenda = processes.Agenda()
     queue_scope = initialscope.make_universal_scope(agenda)
-    evaluate(agenda, definitions, initialscope.make_os_scope(queue_scope))
+    scope = initialscope.make_os_scope(queue_scope, agenda)
+    evaluate(agenda, definitions, scope)
 
 def evaluate(agenda, definitions, scope):
 #    print lispio.write(syntax.expand_toplevel(definitions))
