@@ -35,14 +35,23 @@ def make_selector(method_name):
 # Whitelist of types whose methods preserve capability discipline.
 invocable_types = (basestring, frozenset)
 
+tamings = {
+    'rsplit':     lambda s, *args: tuple(s.rsplit(*args)),
+    'split':      lambda s, *args: tuple(s.split(*args)),
+    'splitlines': lambda s, *args: tuple(s.splitlines(*args)),
+    }
+
 def Selector(method_name):
     def to_call(args, k):
         object = args[0]
         assert isinstance(object, invocable_types), \
             'Not method-invocable: %r' % object
         arguments = args[1:]
-        return RunningState(getattr(object, method_name)(*arguments),
-                            k)
+        if method_name in tamings:
+            result = tamings[method_name](object, *arguments)
+        else:
+            result = getattr(object, method_name)(*arguments)
+        return RunningState(result, k)
     def to___repr__():
         return '#<selector %s>' % method_name
     return Clutch(locals())
