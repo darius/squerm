@@ -179,19 +179,22 @@ def add_process_functions(enclosing_scope, agenda):
                  enclosing_scope)
 
 
+def write_string(s):
+    sys.stdout.write(s)
+
 def write(x):
-    sys.stdout.write(lispio.write(x))
+    write_string(lispio.write(x))
 
 def newline():
-    sys.stdout.write('\n')
+    write_string('\n')
 
 def print_(x):
     write(x)
     newline()
 
 def make_os_scope(outer_scope, agenda):
-    return Scope(map(Symbol, 'write newline print system tcp-connect'.split()),
-                 (map(Primitive, (write, newline, print_, os.system))
+    return Scope(map(Symbol, 'write-string write newline print system tcp-connect'.split()),
+                 (map(Primitive, (write_string, write, newline, print_, os.system))
                   + [TcpConnect(agenda.get_monitor())]),
                  outer_scope)
 

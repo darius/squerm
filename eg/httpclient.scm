@@ -11,7 +11,7 @@
          (let ((m (ask sock! 'read 4096)))
            (cond ((equal? m 'eof) 'ok)
                  ((string? m)
-                  (write m)             ;xxx write-string
+                  (write-string m)
                   (echoing)))))))))
 
 (define (with-new-channel f)
