@@ -13,11 +13,28 @@ def is_list(x):    return isinstance(x, tuple)
 def is_pair(x):    return isinstance(x, tuple) and 0 < len(x)
 def is_null(x):    return x == ()
 def mklist(*args): return tuple(args)
-def append(x, y):  return tuple(x) + y
 
 def cons(x, y):
     assert is_list(y), 'Second argument to cons must be a list: %r' % y
     return (x,) + y
+
+def car(x):
+    assert is_list(x) and 1 <= len(x), \
+        'Argument to car must be a nonnull list: %r' % x
+    return x[0]
+def cdr(x):
+    assert is_list(x) and 1 <= len(x), \
+        'Argument to cdr must be a nonnull list: %r' % x
+    return x[1:]
+
+def sub(*args):
+    if 1 == len(args):
+        return -args[0]
+    if 2 == len(args):
+        return args[0] - args[1]
+    raise TypeError('- expected 1 or 2 arguments')
+
+def append(x, y):  return tuple(x) + y
 
 def assoc(key, alist):
     assert is_list(alist), \
@@ -36,15 +53,6 @@ def member(key, ls):
 	    return ls[i:]
     return False
 
-def car(x):
-    assert is_list(x) and 1 <= len(x), \
-        'Argument to car must be a nonnull list: %r' % x
-    return x[0]
-def cdr(x):
-    assert is_list(x) and 1 <= len(x), \
-        'Argument to cdr must be a nonnull list: %r' % x
-    return x[1:]
-
 def caar(x): return car(car(x))
 def cadr(x): return car(cdr(x))
 def cdar(x): return cdr(car(x))
@@ -59,13 +67,6 @@ def cddar(x): return cdr(cdr(car(x)))
 def cdddr(x): return cdr(cdr(cdr(x)))
 def cadddr(x): return car(cdr(cdr(cdr(x))))
 
-def sub(*args):
-    if 1 == len(args):
-        return -args[0]
-    if 2 == len(args):
-        return args[0] - args[1]
-    raise TypeError('- expected 1 or 2 arguments')
-
 def head(x, n): return x[:n]
 def tail(x, n): return x[n:]
 
@@ -78,27 +79,9 @@ primitives_dict = {
     'pair?':   is_pair,
     'null?':   is_null,
     'list':    mklist,
-    'append':  append,
     'cons':    cons,
-    'assoc':   assoc,
-    'member':  member,
     'car':     car,
     'cdr':     cdr,
-    'caar':    caar,
-    'cadr':    cadr,
-    'cdar':    cdar,
-    'cddr':    cddr,
-    'caaar':   caaar,
-    'caadr':   caadr,
-    'cadar':   cadar,
-    'caddr':   caddr,
-    'cdaar':   cdaar,
-    'cdadr':   cdadr,
-    'cddar':   cddar,
-    'cdddr':   cdddr,
-    'cadddr':  cadddr,
-    'equal?':  lambda x, y: x == y,
-    'not':     lambda x: x is False,
     '+':       operator.add,
     '-':       sub,
     '*':       operator.mul,
@@ -113,6 +96,25 @@ primitives_dict = {
     '>':       operator.gt,
     '>=':      operator.ge,
     'expt':    operator.pow,
+    'equal?':  lambda x, y: x == y,
+
+    'append':  append,
+    'assoc':   assoc,
+    'member':  member,
+    'caar':    caar,
+    'cadr':    cadr,
+    'cdar':    cdar,
+    'cddr':    cddr,
+    'caaar':   caaar,
+    'caadr':   caadr,
+    'cadar':   cadar,
+    'caddr':   caddr,
+    'cdaar':   cdaar,
+    'cdadr':   cdadr,
+    'cddar':   cddar,
+    'cdddr':   cdddr,
+    'cadddr':  cadddr,
+    'not':     lambda x: x is False,
     'head':    head,
     'tail':    tail,
 }
