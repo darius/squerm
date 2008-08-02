@@ -42,15 +42,15 @@ def assoc(key, alist):
     for pair in alist:
         assert is_list(pair), \
             'Second argument to assoc must be an a-list: %r' % alist
-	if pair[0] == key:
-	    return pair
+        if pair[0] == key:
+            return pair
     return False
 
 def member(key, ls):
     assert is_list(ls), 'Second argument to member must be a list: %r' % ls
     for i, element in enumerate(ls):
-	if key == element:
-	    return ls[i:]
+        if key == element:
+            return ls[i:]
     return False
 
 def caar(x): return car(car(x))

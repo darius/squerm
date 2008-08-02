@@ -49,7 +49,7 @@ def FinalK():
 
 def BeginExpr(expr1, expr2):
     def to_eval(scope, k):
-	return expr1.eval(scope, IgnoreK(expr2, scope, k))
+        return expr1.eval(scope, IgnoreK(expr2, scope, k))
     def to___repr__():
         return '(begin %r %r)' % (expr1, expr2)
     return Clutch(locals())
@@ -65,7 +65,7 @@ def IgnoreK(expr, scope, k):
 
 def CallExpr(rator, rands):
     def to_eval(scope, k):
-	return rator.eval(scope, EvRandsK(rands, scope, k, rator))
+        return rator.eval(scope, EvRandsK(rands, scope, k, rator))
     def to___repr__():
         return '(%r%s)' % (rator, ''.join(' %r' % rand for rand in rands))
     return Clutch(locals())
@@ -102,7 +102,7 @@ def EvMoreRandsK(fn, args, rands, scope, k, rator, prev_rands):
 
 def ConstantExpr(value):
     def to_eval(scope, k):
-	return RunningState(value, k)
+        return RunningState(value, k)
     def to___repr__():
         return "'" + repr(value)
     return Clutch(locals())
@@ -140,7 +140,7 @@ def TestK(then_expr, else_expr, scope, k):
     
 def LambdaExpr(variables, expr):
     def to_eval(scope, k):
-	return RunningState(Procedure(scope, variables, expr), k)
+        return RunningState(Procedure(scope, variables, expr), k)
     def to___repr__():
         return '(lambda (%s) %r)' % (' '.join(map(repr, variables)),
                                      expr)
@@ -154,14 +154,14 @@ def Procedure(scope, variables, expr):
     def to_call(args, k):
         assert len(variables) == len(args), \
             "Arguments %r don't match parameters %r" % (args, variables)
-	return expr.eval(Scope(variables, args, scope), k)
+        return expr.eval(Scope(variables, args, scope), k)
     def to___repr__():
         return '#<procedure>'
     return Clutch(locals())
 
 def VarRefExpr(variable):
     def to_eval(scope, k):
-	return RunningState(scope.get(variable), k)
+        return RunningState(scope.get(variable), k)
     def to___repr__():
         return repr(variable)
     return Clutch(locals())
