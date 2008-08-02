@@ -161,7 +161,6 @@ def Procedure(scope, variables, expr):
 
 def VarRefExpr(variable):
     def to_eval(scope, k):
-        import run as foo
 	return RunningState(scope.get(variable), k)
     def to___repr__():
         return repr(variable)
