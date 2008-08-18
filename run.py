@@ -30,3 +30,6 @@ def evaluate(agenda, definitions, scope):
     keeper = initialscope.ComplainingKeeper()
     expr = syntax.expand_toplevel(definitions)
     interpret.run(agenda, keeper, expr, scope)
+
+if __name__ == '__main__':
+    testme()
