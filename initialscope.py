@@ -202,9 +202,10 @@ def print_(x):
     newline()
 
 def make_os_scope(outer_scope, agenda):
-    return Scope(map(Symbol, 'write-string write newline print system tcp-connect'.split()),
-                 (map(Primitive, (write_string, write, newline, print_, os.system))
-                  + [TcpConnect(agenda.get_monitor())]),
+    names = 'write-string write newline print system'
+    funcs = [write_string, write, newline, print_, os.system]
+    return Scope(map(Symbol, names.split() + ['tcp-connect']),
+                 map(Primitive, funcs) + [TcpConnect(agenda.get_monitor())],
                  outer_scope)
 
 def TcpConnect(monitor):
