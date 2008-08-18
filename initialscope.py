@@ -290,7 +290,7 @@ class ConnectedReactor(asyncio.SocketStreamReactor):
                 self.readable = True
                 self.read_buffer_size = n_bytes
                 self.read_k = k
-                self.demands.pop(0) # XXX inefficient
+                self.demands.pop(0) # XXX inefficient; use collections.deque
             elif len(demand) == 3 and demand[0] == _write:
                 if self.writable:
                     # We already have a write to perform; for this
