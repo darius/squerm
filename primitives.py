@@ -70,6 +70,10 @@ def cadddr(x): return car(cdr(cdr(cdr(x))))
 def head(x, n): return x[:n]
 def tail(x, n): return x[n:]
 
+def string_from_number(n):
+    assert isinstance(n, (int, float))
+    return '%s' % n
+
 primitives_dict = {
     'boolean?': is_bool,
     'number?': is_number,
@@ -117,4 +121,13 @@ primitives_dict = {
     'not':     lambda x: x is False,
     'head':    head,
     'tail':    tail,
+
+    'chr':     chr,
+    'ord':     ord,
+    'string<-number': string_from_number,
+    'length':  len,
+    'get':     lambda x, key: x[key],
+    'slice':   lambda x, lo, hi=None: x[lo:hi],
+    'max':     max,
+    'min':     min,
 }

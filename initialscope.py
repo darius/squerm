@@ -188,6 +188,9 @@ def add_process_functions(enclosing_scope, agenda):
                  enclosing_scope)
 
 
+def read_string(n):
+    return sys.stdin.read(n)
+
 def write_string(s):
     sys.stdout.write(s)
 
@@ -202,8 +205,8 @@ def print_(x):
     newline()
 
 def make_os_scope(outer_scope, agenda):
-    names = 'write-string write newline print system'
-    funcs = [write_string, write, newline, print_, os.system]
+    names = 'read-string write-string write newline print system'
+    funcs = [read_string, write_string, write, newline, print_, os.system]
     return Scope(map(Symbol, names.split() + ['tcp-connect']),
                  map(Primitive, funcs) + [TcpConnect(agenda.get_monitor())],
                  outer_scope)
