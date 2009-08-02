@@ -1,3 +1,5 @@
+import itertools
+
 from clutch import Clutch, Box
 from interpret import *
 from primitives import *
@@ -101,12 +103,10 @@ def macroexpand_1(exp):
     else:
         return exp
 
-gensym_counter = 0
+gensym_counter = itertools.count(1)
 
 def gensym():
-    global gensym_counter
-    gensym_counter += 1
-    return Symbol('#G%s' % gensym_counter)
+    return Symbol('#G%s' % gensym_counter.next())
 
 def make_begin(exps):
     if len(exps) == 1:
