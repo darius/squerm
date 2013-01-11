@@ -1,5 +1,5 @@
 (define (main)
-  (url-fetch "google.com" 80 "/"))
+  (url-fetch "wry.me" 80 "/"))
 
 (define (url-fetch host port path)
   (with-new-channel
