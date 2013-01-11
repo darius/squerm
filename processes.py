@@ -1,4 +1,5 @@
 import asyncio
+import itertools
 from clutch import Clutch, Box
 
 def Agenda():
@@ -34,7 +35,10 @@ def Agenda():
     agenda = Clutch(locals())
     return agenda
 
+process_ids = itertools.count()
+
 def Process(opt_keeper, initial_state):
+    my_id = next(process_ids)
     state = Box(initial_state)
     def to_is_runnable():
         return state._.is_runnable()
@@ -52,7 +56,7 @@ def Process(opt_keeper, initial_state):
             if opt_keeper:
                 opt_keeper.send(failure)
     def to___repr__():
-        return '#<process %x>' % id(process)
+        return '#<process %d>' % my_id
     process = Clutch(locals())
     return process
 
