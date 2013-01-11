@@ -24,12 +24,11 @@
                                      (vote< (<v)))))
 
 (define (with-new-slate k)
-  (let ((pair (sprout2-spawn complaining-keeper
-                             (lambda (<vote <tally)
-                               (slate-loop <vote <tally '())))))
-    (let ((vote< (car pair))
-          (tally< (cadr pair)))
-      (k vote< tally<))))
+  (mcase (sprout2-spawn complaining-keeper
+                        (lambda (<vote <tally)
+                          (slate-loop <vote <tally '())))
+    ((vote< tally<)
+     (k vote< tally<))))
 
 (define (slate-loop <vote <tally pairs)
   (let loop ((pairs pairs))

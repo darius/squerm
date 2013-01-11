@@ -67,6 +67,9 @@ def cddar(x): return cdr(cdr(car(x)))
 def cdddr(x): return cdr(cdr(cdr(x)))
 def cadddr(x): return car(cdr(cdr(cdr(x))))
 
+def match_error(x):
+    raise Exception("Match error", x)
+
 def head(x, n): return x[:n]
 def tail(x, n): return x[n:]
 
@@ -118,6 +121,7 @@ primitives_dict = {
     'cddar':   cddar,
     'cdddr':   cdddr,
     'cadddr':  cadddr,
+    'match-error': match_error,
     'not':     lambda x: x is False,
     'head':    head,
     'tail':    tail,

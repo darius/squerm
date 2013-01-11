@@ -17,6 +17,8 @@ _p, _quote, _selector = \
 _arrow = Symbol('=>')
 _append, _cons, _quasiquote, _unquote, _unquote_splicing = \
     _make_symbols('append cons quasiquote unquote unquote-splicing')
+_car, _cdr, _match_error, _mcase, _mlambda, _not, _pairP = \
+    _make_symbols('car cdr match-error mcase mlambda not pair?')
 
 
 # Concrete syntax
@@ -200,6 +202,50 @@ def macro_named_let(exp):
                        proc),
                 exps)
 
+def macro_mcase(exp):
+    subject = cadr(exp)
+    clauses = cddr(exp)
+    # (mcase subject (pattern action) ...) ==>
+    # ((mlambda (pattern action) ...) subject)
+    return mklist(cons(_mlambda, clauses),
+                  subject)
+
+def macro_mlambda(exp):
+    clauses = cdr(exp)
+    if is_null(clauses):
+        return _match_error
+    subject, fail = gensym(), gensym()
+    return mklist(_lambda, mklist(subject),
+                  mklist(_let, mklist(mklist(fail,
+                                             mklist(_lambda, (),
+                                                    cons(_mcase,
+                                                         cons(subject,
+                                                              cdr(clauses)))))),
+                         expand_pattern(subject, caar(clauses),
+                                        mklist(fail), cons(_begin, cdar(clauses)))))
+
+def expand_pattern(subject, pat, fail, succeed):
+    def test(literal):
+        return mklist(_if, mklist(_not, mklist(_equalP, subject, literal)),
+                      fail,
+                      succeed)
+    if is_symbol(pat):
+        return mklist(_let, mklist(mklist(pat, subject)), succeed)
+    elif not is_pair(pat):
+        return test(mklist(_quote, pat))
+    elif car(pat) == _quote:
+        return test(pat)
+    else:
+        return mklist(_if, mklist(_not, mklist(_pairP, subject)),
+                      fail,
+                      expand_pattern(mklist(_car, subject),
+                                     car(pat),
+                                     fail,
+                                     expand_pattern(mklist(_cdr, subject),
+                                                    cdr(pat),
+                                                    fail,
+                                                    succeed)))
+
 def macro_or(exp):
     if len(exp) == 1:
         return False
@@ -257,6 +303,8 @@ macros = {
     _case:       macro_case,
     _cond:       macro_cond,
     _let:        macro_let,
+    _mcase:      macro_mcase,
+    _mlambda:    macro_mlambda,
     _or:         macro_or,
     _selector:   macro_selector,
     _quasiquote: macro_quasiquote,

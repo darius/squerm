@@ -17,17 +17,12 @@
        (let loop ((table '()))
          (choose
           (list (list kill-? (lambda (_) (print "dict killed")))
-                (list ? (lambda (m)
-                          (let ((return! (car m))
-                                (command (cadr m)))
-                            (case (car command)
-                              ((get)
-                               (return! (look-up (cadr command) table))
-                               (loop table))
-                              ((put)
-                               (loop (acons (cadr command)
-                                            (caddr command)
-                                            table))))))))))))))
+                (list ? (mlambda
+                         ((return! ('get key))
+                          (return! (look-up key table))
+                          (loop table))
+                         ((_ ('put key value))
+                          (loop (acons key value table))))))))))))
 
 (define (look-up key a-list)
   (cond ((assoc key a-list) => cadr)
