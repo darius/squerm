@@ -2,27 +2,21 @@
   (url-fetch "wry.me" 80 "/"))
 
 (define (url-fetch host port path)
-  (with-new-channel
-   (lambda (conn? conn!)
-     (tcp-connect conn! (list host port) complaining-keeper)
-     (let ((sock! (conn?)))
-       (send sock! (string-append "GET " path " HTTP/1.0\r\n\r\n"))
-       (let echoing ()
-         (let ((m (ask sock! 'read 4096)))
-           (cond ((equal? m 'eof) 'ok)
-                 ((string? m)
-                  (write-string m)
-                  (echoing)))))))))
-
-(define (with-new-channel f)
-  (let ((pair (sprout)))
-    (f (car pair) (cadr pair))))
+  (mlet ((conn? conn!) (sprout))
+    (tcp-connect conn! (list host port) complaining-keeper)
+    (let ((sock! (conn?)))
+      (send sock! (string-append "GET " path " HTTP/1.0\r\n\r\n"))
+      (let echoing ()
+        (let ((m (ask sock! 'read 4096)))
+          (cond ((equal? m 'eof) 'ok)
+                ((string? m)
+                 (write-string m)
+                 (echoing))))))))
 
 (define (ask server! tag message)
-  (with-new-channel
-   (lambda (? !)
-     (server! (list tag message !))
-     (?))))
+  (mlet ((? !) (sprout))
+    (server! (list tag message !))
+    (?)))
 
 (define (string-append a b c)
   ; XXX hack

@@ -17,8 +17,8 @@ _p, _quote, _selector = \
 _arrow = Symbol('=>')
 _append, _cons, _quasiquote, _unquote, _unquote_splicing = \
     _make_symbols('append cons quasiquote unquote unquote-splicing')
-_car, _cdr, _match_error, _mcase, _mlambda, _not, _pairP = \
-    _make_symbols('car cdr match-error mcase mlambda not pair?')
+_car, _cdr, _match_error, _mcase, _mlambda, _mlet, _not, _pairP = \
+    _make_symbols('car cdr match-error mcase mlambda mlet not pair?')
 
 
 # Concrete syntax
@@ -210,6 +210,15 @@ def macro_mcase(exp):
     return mklist(cons(_mlambda, clauses),
                   subject)
 
+def macro_mlet(exp):
+    # (mlet (pattern subject) body ...) ==>
+    # ((mlambda (pattern body ...)) subject)
+    binding = cadr(exp)
+    body = cddr(exp)
+    pattern = car(binding)
+    subject = cadr(binding)
+    return mklist(mklist(_mlambda, cons(pattern, body)), subject)
+
 def macro_mlambda(exp):
     clauses = cdr(exp)
     if is_null(clauses):
@@ -305,6 +314,7 @@ macros = {
     _let:        macro_let,
     _mcase:      macro_mcase,
     _mlambda:    macro_mlambda,
+    _mlet:       macro_mlet,
     _or:         macro_or,
     _selector:   macro_selector,
     _quasiquote: macro_quasiquote,
