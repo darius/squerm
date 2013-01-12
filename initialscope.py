@@ -228,9 +228,9 @@ def TcpConnect(monitor):
 
 class ConnectingReactor(asyncio.ClientSocketReactor):
     def __init__(self, monitor, address, keeper, sender):
-        asyncio.ClientSocketReactor.__init__(self, monitor, address)
         self.keeper = keeper
         self.sender = sender
+        asyncio.ClientSocketReactor.__init__(self, monitor, address)
     def poll_readable(self):
         return False
     def on_connect(self):
@@ -253,8 +253,6 @@ def ReactorReceiver(reactor):
 class ConnectedReactor(asyncio.SocketStreamReactor):
 
     def __init__(self, monitor, socket, address, keeper):
-        asyncio.SocketStreamReactor.__init__(self,
-                                             monitor, socket, address, True)
         self.keeper       = keeper
         self.demands      = []
         self.readable     = False
@@ -264,6 +262,8 @@ class ConnectedReactor(asyncio.SocketStreamReactor):
         self.write_k      = None
         self.write_must_complete = False
         self.write_count  = 0
+        asyncio.SocketStreamReactor.__init__(self,
+                                             monitor, socket, address, True)
 
     def enqueue_demand(self, message):
         self.demands.append(message)
