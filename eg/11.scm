@@ -1,20 +1,20 @@
 (define (main)
-  (with-purse-module complaining-keeper
-   (lambda (purse? make-purse! purse-balance! purse-transfer!)
-     ; XXX ok, we really need a new naming convention!
-     ;  among other things
+  (mlet ((purse? make-purse! purse-balance! purse-transfer!)
+         (make-purse-module complaining-keeper))
+    ;; XXX ok, we really need a new naming convention!
+    ;;  among other things
 
-     (let ((make-purse     (make-asker make-purse!     'make-purse))
-           (purse-balance  (make-asker purse-balance!  'get-balance))
-           (purse-transfer (make-asker purse-transfer! 'transfer)))
-       (let ((alice (make-purse 42))
-             (bob   (make-purse 0)))
-         (print (purse-transfer (list bob alice 10)))
-         (print (purse-balance alice))
-         (print (purse-balance bob))
-         (print (purse-transfer (list bob alice 100))))))))
+    (let ((make-purse     (make-asker make-purse!     'make-purse))
+          (purse-balance  (make-asker purse-balance!  'get-balance))
+          (purse-transfer (make-asker purse-transfer! 'transfer)))
+      (let ((alice (make-purse 42))
+            (bob   (make-purse 0)))
+        (print (purse-transfer (list bob alice 10)))
+        (print (purse-balance alice))
+        (print (purse-balance bob))
+        (print (purse-transfer (list bob alice 100)))))))
 
-(define (with-purse-module keeper f)
+(define (make-purse-module keeper)
   (mlet ((seal unseal purse?) (make-sealer 'purse))
     (local
 
@@ -66,10 +66,10 @@
                          (to-purse (list 'add amount k))))))
              (loop))))))
 
-     (f purse?
-        (sprout-spawn keeper purse-maker-server)
-        (sprout-spawn keeper purse-balance-server)
-        (sprout-spawn keeper purse-transfer-server)))))
+     (list purse?
+           (sprout-spawn keeper purse-maker-server)
+           (sprout-spawn keeper purse-balance-server)
+           (sprout-spawn keeper purse-transfer-server)))))
 
 (define (sprout-spawn keeper fn)
   (mlet ((initial-? initial-!) (sprout))
