@@ -21,12 +21,12 @@
      ((define (purse-maker-server ? !)
         (let loop ()
           (mcase (?)
-            (('make-purse arg k)
-             (cond ((not (number? arg)) (k 'bad-type))
-                   ((< arg 0) (k 'negative-amount))
+            (('make-purse initial-amount k)
+             (cond ((not (number? initial-amount)) (k 'bad-type))
+                   ((< initial-amount 0) (k 'negative-amount))
                    (else 
                     (k (seal (sprout-spawn keeper
-                                           (make-purse-server arg))))))
+                                           (make-purse-server initial-amount))))))
              (loop)))))
 
       (define (make-purse-server initial-amount)
@@ -36,8 +36,8 @@
               (('get-balance _ k)
                (k balance)
                (loop balance))
-              (('add arg k)
-               (let ((new-balance (+ balance arg)))
+              (('add amount k)
+               (let ((new-balance (+ balance amount)))
                  (cond ((< new-balance 0)
                         (k 'insufficient-funds)
                         (loop balance))
@@ -48,8 +48,8 @@
       (define (purse-balance-server ? !)
         (let loop ()
           (mcase (?)
-            (('get-balance arg k)
-             ((unseal arg) (list 'get-balance #f k))
+            (('get-balance purse/sealed k)
+             ((unseal purse/sealed) (list 'get-balance #f k))
              (loop)))))
 
       (define (purse-transfer-server ? !)
