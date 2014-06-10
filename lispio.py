@@ -66,7 +66,7 @@ def read_iter(input):
                     advance()
                     break
                 if t == eof:
-                    raise 'Incomplete list'
+                    raise ValueError('Incomplete list')
                 element = read()
                 result.append(element)
             return tuple(result)

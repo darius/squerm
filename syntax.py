@@ -77,7 +77,7 @@ def expand_exp(the_exp):
             variable = car(cadr(exp))
             value_exp = cons(_lambda, cons(cdr(cadr(exp)), cddr(exp)))
         else:
-            raise 'Bad syntax', exp
+            raise Exception('Bad syntax', exp)
         return (variable, expand(value_exp))
 
     def expand_quote(exp):

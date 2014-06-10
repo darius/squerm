@@ -18,6 +18,7 @@
             voters))
               
 (define (make-ballot vote<)
+  ;; Return a sender that forwards to vote< once (and no more).
   (sprout-spawn complaining-keeper (lambda (<v v<)
                                      (vote< (<v)))))
 
